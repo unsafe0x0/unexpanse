@@ -23,10 +23,10 @@ async function main() {
 
   console.log(`User: ${user.email}`);
 
-
-
   // Create categories
-  const existingCats = await prisma.category.findMany({ where: { userId: user.id } });
+  const existingCats = await prisma.category.findMany({
+    where: { userId: user.id },
+  });
   if (existingCats.length === 0) {
     await prisma.category.createMany({
       data: DEFAULT_CATEGORIES.map((cat) => ({
@@ -40,7 +40,9 @@ async function main() {
     console.log(`Created ${DEFAULT_CATEGORIES.length} categories`);
   }
 
-  const categories = await prisma.category.findMany({ where: { userId: user.id } });
+  const categories = await prisma.category.findMany({
+    where: { userId: user.id },
+  });
   const catMap = Object.fromEntries(categories.map((c) => [c.name, c.id]));
 
   // Generate sample transactions (last 6 months)
@@ -82,7 +84,9 @@ async function main() {
         amount: exp.min + Math.random() * (exp.max - exp.min),
         description: exp.desc,
         categoryId: catMap[exp.cat] || null,
-        paymentMethod: ["Credit Card", "Debit Card", "Cash"][Math.floor(Math.random() * 3)],
+        paymentMethod: ["Credit Card", "Debit Card", "Cash"][
+          Math.floor(Math.random() * 3)
+        ],
         date: new Date(d.getFullYear(), d.getMonth(), day),
         tags: [],
       });
@@ -144,5 +148,8 @@ async function main() {
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
   .finally(() => prisma.$disconnect());
