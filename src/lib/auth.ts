@@ -32,7 +32,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: user.name,
           email: user.email,
           image: user.image,
-          currency: user.currency ?? "USD",
+          currency: user.currency ?? "INR",
           createdAt: user.createdAt,
         };
       },
@@ -46,7 +46,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id;
         token.image = user.image;
-        token.currency = (user as { currency?: string }).currency || "USD";
+        token.currency = (user as { currency?: string }).currency || "INR";
         token.createdAt = (
           user as { createdAt?: Date }
         ).createdAt?.toISOString();
@@ -56,7 +56,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           where: { id: token.id as string },
           select: { currency: true },
         });
-        token.currency = dbUser?.currency ?? "USD";
+        token.currency = dbUser?.currency ?? "INR";
       }
       return token;
     },
@@ -65,7 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.image = (token.image as string) || session.user.image;
         (session.user as { currency?: string }).currency =
-          (token.currency as string) || "USD";
+          (token.currency as string) || "INR";
         (session.user as { createdAt?: string }).createdAt =
           token.createdAt as string;
       }

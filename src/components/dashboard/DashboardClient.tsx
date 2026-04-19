@@ -34,7 +34,7 @@ export function DashboardClient({
 }: DashboardClientProps) {
   const { activeTab } = useTabStore();
   
-  const currency = stats?.currency || session?.user?.currency || "USD";
+  const currency = stats?.currency || session?.user?.currency || "INR";
   const fmt = (n: number) => formatCurrency(n, currency);
 
   const greeting = () => {

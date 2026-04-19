@@ -45,7 +45,7 @@ export function TransactionModal({
   onClose,
   categories,
   initialData,
-  currency = "USD",
+  currency = "INR",
 }: TransactionModalProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -106,6 +106,16 @@ export function TransactionModal({
           isEditing ? "Transaction updated" : "Transaction added",
           isEditing ? "Changes saved successfully." : `${type === "INCOME" ? "Income" : "Expense"} recorded.`
         );
+        if (!isEditing) {
+          setForm({
+            amount: "",
+            description: "",
+            categoryId: "",
+            note: "",
+            paymentMethod: "",
+            date: new Date().toISOString().split("T")[0],
+          });
+        }
         onClose();
         router.refresh();
       }

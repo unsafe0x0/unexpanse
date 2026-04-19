@@ -212,6 +212,6 @@ export async function getDashboardStats() {
     incomeChange: changePercent(current.income, last.income),
     expenseChange: changePercent(current.expense, last.expense),
     recentTransactions: recentTx,
-    currency: userDb?.currency || "USD",
+    currency: userDb?.currency || "INR",
   };
 }

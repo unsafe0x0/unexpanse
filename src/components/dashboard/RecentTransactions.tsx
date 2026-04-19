@@ -25,7 +25,7 @@ interface RecentTransactionsProps {
 
 export function RecentTransactions({
   transactions,
-  currency = "USD",
+  currency = "INR",
 }: RecentTransactionsProps) {
   const { setActiveTab } = useTabStore();
 

@@ -77,6 +77,7 @@ export function CategoriesClient({ categories: initial }: CategoriesClientProps)
         const result = await createCategory(form);
         if (result.error) { toast.error("Error", result.error); return; }
         toast.success("Category created");
+        setForm({ name: "", icon: "tag", color: "#6366F1" });
         router.refresh();
       }
       setModalOpen(false);

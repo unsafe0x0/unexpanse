@@ -14,7 +14,7 @@ interface Category {
 
 export function QuickAddButton({
   categories,
-  currency = "USD",
+  currency = "INR",
 }: {
   categories: Category[];
   currency?: string;

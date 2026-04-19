@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-// Lightweight auth config for middleware (no Prisma/bcrypt imports)
 export const {
   auth: authMiddleware,
   handlers,
@@ -14,7 +13,7 @@ export const {
         email: {},
         password: {},
       },
-      authorize: async () => null, // Actual auth happens in auth.ts
+      authorize: async () => null,
     }),
   ],
   callbacks: {
@@ -23,7 +22,7 @@ export const {
         session.user.id = token.id as string;
         session.user.image = (token.image as string) || session.user.image;
         (session.user as { currency?: string }).currency =
-          (token.currency as string) || "USD";
+          (token.currency as string) || "INR";
       }
       return session;
     },
@@ -31,7 +30,7 @@ export const {
       if (user) {
         token.id = user.id;
         token.image = user.image;
-        token.currency = (user as { currency?: string }).currency || "USD";
+        token.currency = (user as { currency?: string }).currency || "INR";
       }
       return token;
     },

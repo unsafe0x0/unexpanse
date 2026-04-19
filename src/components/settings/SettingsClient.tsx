@@ -45,7 +45,7 @@ export function SettingsClient({
   const [isDeleting, setIsDeleting] = useState(false);
   const [form, setForm] = useState({
     name: user?.name ?? "",
-    currency: user?.currency ?? "USD",
+    currency: user?.currency ?? "INR",
   });
 
   const handleSaveProfile = async (e: React.FormEvent) => {

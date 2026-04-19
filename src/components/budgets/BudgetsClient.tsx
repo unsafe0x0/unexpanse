@@ -39,7 +39,7 @@ interface BudgetsClientProps {
   currency?: string;
 }
 
-export function BudgetsClient({ budgets: initial, categories, spending, currency = "USD" }: BudgetsClientProps) {
+export function BudgetsClient({ budgets: initial, categories, spending, currency = "INR" }: BudgetsClientProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [budgets, setBudgets] = useState(initial);
@@ -112,6 +112,7 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
       } else {
         await createBudget(data);
         toast.success("Budget created");
+        setForm({ name: "", amount: "", categoryId: "", period: "monthly" });
         router.refresh();
       }
       setModalOpen(false);

@@ -58,7 +58,7 @@ function CustomTooltip({
   return null;
 }
 
-export function AnalyticsClient({ transactions, currency = "USD" }: AnalyticsClientProps) {
+export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsClientProps) {
   const monthlyData = useMemo(() => {
     const map: Record<string, { month: string; income: number; expense: number; net: number }> = {};
     transactions.forEach((tx) => {
