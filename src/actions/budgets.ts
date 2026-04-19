@@ -52,13 +52,20 @@ export async function createBudget(data: {
 export async function updateBudget(id: string, data: {
   name: string;
   amount: number;
+  categoryId?: string;
+  period: string;
 }) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
 
   await prisma.budget.updateMany({
     where: { id, userId: session.user.id },
-    data: { name: data.name, amount: data.amount },
+    data: { 
+      name: data.name, 
+      amount: data.amount,
+      categoryId: data.categoryId || null,
+      period: data.period
+    },
   });
 
   revalidatePath("/dashboard/budgets");

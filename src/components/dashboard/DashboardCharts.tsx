@@ -84,16 +84,16 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
     function generatePlaceholderData() {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
       setSpendingData(
-        months.map((month) => ({
+        months.map((month, i) => ({
           month,
-          income: Math.random() * 3000 + 2000,
-          expense: Math.random() * 2000 + 1000,
+          income: 2000 + i * 100,
+          expense: 1500 + i * 50,
         }))
       );
       setCategoryData(
         categories.slice(0, 5).map((cat, i) => ({
           name: cat.name,
-          value: Math.random() * 500 + 100,
+          value: 200 + i * 50,
           color: cat.color || CHART_COLORS[i % CHART_COLORS.length],
         }))
       );
@@ -106,6 +106,8 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
           const data = await res.json();
           setSpendingData(data.monthly ?? []);
           setCategoryData(data.byCategory ?? []);
+        } else {
+          generatePlaceholderData();
         }
       } catch {
         generatePlaceholderData();
@@ -115,7 +117,7 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
     }
 
     fetchChartData();
-  }, [userId, categories]);
+  }, [userId, categories.length]);
 
   const renderTooltip = useCallback(
     (props: TooltipContentProps<ValueType, NameType>) => <CustomTooltip {...props} currency={currency} />,

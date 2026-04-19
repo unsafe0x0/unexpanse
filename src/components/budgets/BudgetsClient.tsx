@@ -14,6 +14,7 @@ import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { Plus, PencilSimple, Trash, Target, Warning } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
+import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
 interface Category {
   id: string;
@@ -96,10 +97,15 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
       };
 
       if (editingBudget) {
-        await updateBudget(editingBudget.id, { name: data.name, amount: data.amount });
+        await updateBudget(editingBudget.id, data);
         setBudgets((prev) =>
           prev.map((b) =>
-            b.id === editingBudget.id ? { ...b, name: data.name, amount: data.amount } : b
+            b.id === editingBudget.id ? { 
+              ...b, 
+              ...data, 
+              categoryId: data.categoryId || null,
+              category: categories.find(c => c.id === data.categoryId) || null
+            } : b
           )
         );
         toast.success("Budget updated");
@@ -138,7 +144,7 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
     ...categories.map((c) => ({
       value: c.id,
       label: c.name,
-      icon: <span>{c.icon}</span>,
+      icon: <CategoryIcon name={c.icon} size={14} />,
     })),
   ];
 
@@ -187,7 +193,7 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
                         className="h-8 w-8 rounded-lg flex items-center justify-center text-base"
                         style={{ background: `${budget.category.color}20` }}
                       >
-                        {budget.category.icon}
+                        <CategoryIcon name={budget.category.icon} size={18} />
                       </div>
                     )}
                     <div>
@@ -279,25 +285,23 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
             error={errors.amount}
             leftIcon={<span className="text-xs text-muted-foreground">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).formatToParts(0).find(p => p.type === 'currency')?.value || '$'}</span>}
           />
-          {!editingBudget && (
-            <>
-              <Select
-                id="budget-category"
-                label="Category (optional)"
-                options={categoryOptions}
-                value={form.categoryId}
-                onChange={(v) => setForm((f) => ({ ...f, categoryId: v }))}
-                placeholder="All expenses"
-              />
-              <Select
-                id="budget-period"
-                label="Period"
-                options={periodOptions}
-                value={form.period}
-                onChange={(v) => setForm((f) => ({ ...f, period: v }))}
-              />
-            </>
-          )}
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              id="budget-category"
+              label="Category (optional)"
+              options={categoryOptions}
+              value={form.categoryId}
+              onChange={(v) => setForm((f) => ({ ...f, categoryId: v }))}
+              placeholder="All expenses"
+            />
+            <Select
+              id="budget-period"
+              label="Period"
+              options={periodOptions}
+              value={form.period}
+              onChange={(v) => setForm((f) => ({ ...f, period: v }))}
+            />
+          </div>
           <div className="flex gap-2">
             <Button type="button" variant="outline" className="flex-1" onClick={() => setModalOpen(false)}>
               Cancel
