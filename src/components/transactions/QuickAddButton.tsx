@@ -12,7 +12,13 @@ interface Category {
   color: string;
 }
 
-export function QuickAddButton({ categories }: { categories: Category[] }) {
+export function QuickAddButton({
+  categories,
+  currency = "USD",
+}: {
+  categories: Category[];
+  currency?: string;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -28,6 +34,7 @@ export function QuickAddButton({ categories }: { categories: Category[] }) {
         isOpen={open}
         onClose={() => setOpen(false)}
         categories={categories}
+        currency={currency}
       />
     </>
   );

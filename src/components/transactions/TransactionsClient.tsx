@@ -382,6 +382,7 @@ export function TransactionsClient({
         isOpen={modalOpen}
         onClose={() => { setModalOpen(false); setEditingTx(null); }}
         categories={categories}
+        currency={currency}
         initialData={
           editingTx
             ? {

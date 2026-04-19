@@ -37,6 +37,7 @@ interface TransactionModalProps {
   onClose: () => void;
   categories: Category[];
   initialData?: TransactionData;
+  currency?: string;
 }
 
 export function TransactionModal({
@@ -44,6 +45,7 @@ export function TransactionModal({
   onClose,
   categories,
   initialData,
+  currency = "USD",
 }: TransactionModalProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -152,7 +154,11 @@ export function TransactionModal({
           onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
           error={errors.amount}
           leftIcon={
-            <span className="text-xs font-medium text-muted-foreground">$</span>
+            <span className="text-xs text-muted-foreground">
+              {new Intl.NumberFormat("en-US", { style: "currency", currency })
+                .formatToParts(0)
+                .find((p) => p.type === "currency")?.value || "$"}
+            </span>
           }
         />
 

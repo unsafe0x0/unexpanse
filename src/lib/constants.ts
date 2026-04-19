@@ -25,6 +25,7 @@ export const PAYMENT_METHODS = [
   "Debit Card",
   "Bank Transfer",
   "Digital Wallet",
+  "UPI",
   "Cryptocurrency",
   "Check",
   "Other",

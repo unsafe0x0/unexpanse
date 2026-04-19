@@ -55,7 +55,7 @@ export function DashboardClient({
             Here&apos;s your financial overview for this month
           </p>
         </div>
-        <QuickAddButton categories={categories} />
+        <QuickAddButton categories={categories} currency={currency} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
