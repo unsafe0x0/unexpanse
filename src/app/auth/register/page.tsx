@@ -50,8 +50,7 @@ export default function RegisterPage() {
       });
 
       toast.success("Account created!", "Welcome to unexpanse. Setting up your dashboard...");
-      router.push("/dashboard");
-      router.refresh();
+      window.location.href = "/dashboard";
     } catch {
       toast.error("Something went wrong", "Please try again later.");
     } finally {

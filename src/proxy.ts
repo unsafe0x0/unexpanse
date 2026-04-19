@@ -1,16 +1,9 @@
+import { authMiddleware } from "@/lib/auth-edge";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
 
-export async function proxy(request: NextRequest) {
+export const proxy = authMiddleware((request) => {
   const { nextUrl } = request;
-
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-  });
-
-  const isLoggedIn = !!token;
+  const isLoggedIn = !!request.auth;
 
   const isAuthPage =
     nextUrl.pathname.startsWith("/auth/login") ||
@@ -30,7 +23,7 @@ export async function proxy(request: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
