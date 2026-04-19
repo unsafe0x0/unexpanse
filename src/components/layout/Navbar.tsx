@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useSidebarStore } from "@/store";
+import { useSidebarStore, useTabStore } from "@/store";
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import {
@@ -13,13 +13,13 @@ import {
   Gear,
   CaretDown,
 } from "@phosphor-icons/react";
-import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
   const { toggle } = useSidebarStore();
+  const { setActiveTab } = useTabStore();
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -106,14 +106,17 @@ export function Navbar() {
                 <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
               </div>
               <div className="py-1">
-                <Link
-                  href="/dashboard/settings"
-                  className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent transition-colors"
-                  onClick={() => setMenuOpen(false)}
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent transition-colors text-left"
+                  onClick={() => {
+                    setActiveTab("settings");
+                    setMenuOpen(false);
+                  }}
                 >
                   <Gear size={16} className="text-muted-foreground" />
                   Settings
-                </Link>
+                </button>
                 <button
                   onClick={() => signOut({ callbackUrl: "/auth/login" })}
                   className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent transition-colors text-destructive"

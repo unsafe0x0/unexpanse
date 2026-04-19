@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/Badge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { ArrowsLeftRight } from "@phosphor-icons/react";
-import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { useTabStore } from "@/store";
 
 interface Transaction {
   id: string;
@@ -27,6 +27,8 @@ export function RecentTransactions({
   transactions,
   currency = "USD",
 }: RecentTransactionsProps) {
+  const { setActiveTab } = useTabStore();
+
   if (transactions.length === 0) {
     return (
       <div className="rounded-xl border border-border">
@@ -89,11 +91,14 @@ export function RecentTransactions({
       </div>
 
       <div className="px-4 py-3 border-t border-border bg-muted/20 flex justify-center">
-        <Link href="/dashboard/transactions">
-          <Button variant="ghost" size="sm">
-            View all transactions →
-          </Button>
-        </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          type="button"
+          onClick={() => setActiveTab("transactions")}
+        >
+          View all transactions →
+        </Button>
       </div>
     </div>
   );
