@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  AreaChart,
-  Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -53,7 +53,7 @@ function CustomTooltip({
 }: TooltipContentProps<ValueType, NameType> & { currency: string }) {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-border bg-card p-3 shadow-lg text-sm">
+      <div className="rounded-lg border border-border bg-card p-3 shadow-lg text-sm text-card-foreground">
         <p className="font-medium mb-2">{label}</p>
         {(payload as unknown as Array<{ name: string; value: number; color: string }>).map((entry) => (
           <div key={entry.name} className="flex items-center gap-2">
@@ -145,17 +145,13 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
       <div className="rounded-xl bg-card p-5">
         <p className="text-base font-semibold tracking-tight mb-4">Spending Trend</p>
         <ResponsiveContainer width="100%" height={220}>
-          <AreaChart data={spendingData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10B981" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#EF4444" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
-              </linearGradient>
-            </defs>
+          <BarChart
+            data={[...spendingData].sort((a, b) => {
+              const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+              return months.indexOf(a.month) - months.indexOf(b.month);
+            })}
+            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="month"
@@ -168,29 +164,25 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => {
-                const parts = new Intl.NumberFormat("en-US", { style: "currency", currency }).formatToParts(v);
-                const symbol = parts.find(p => p.type === 'currency')?.value || '$';
+                const symbol = new Intl.NumberFormat("en-US", { style: "currency", currency }).formatToParts(0).find(p => p.type === 'currency')?.value || '$';
                 return `${symbol}${(v / 1000).toFixed(0)}k`;
               }}
             />
-            <Tooltip content={renderTooltip} />
-            <Area
-              type="monotone"
+            <Tooltip content={renderTooltip} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
+            <Legend iconType="circle" iconSize={8} verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: 10, fontSize: 12 }} />
+            <Bar
               dataKey="income"
               name="Income"
-              stroke="#10B981"
-              strokeWidth={2}
-              fill="url(#incomeGrad)"
+              fill="#10B981"
+              radius={[4, 4, 0, 0]}
             />
-            <Area
-              type="monotone"
+            <Bar
               dataKey="expense"
               name="Expense"
-              stroke="#EF4444"
-              strokeWidth={2}
-              fill="url(#expenseGrad)"
+              fill="#EF4444"
+              radius={[4, 4, 0, 0]}
             />
-          </AreaChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
 

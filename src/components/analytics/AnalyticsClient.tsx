@@ -43,7 +43,7 @@ function CustomTooltip({
 }: TooltipContentProps<ValueType, NameType> & { currency: string }) {
   if (active && payload?.length) {
     return (
-      <div className="rounded-lg border border-border bg-card p-3 shadow-lg text-sm">
+      <div className="rounded-lg border border-border bg-card p-3 shadow-lg text-sm text-card-foreground">
         <p className="font-medium mb-1.5">{label}</p>
         {(payload as unknown as Array<{ name: string; value: number; color: string }>).map((e) => (
           <div key={e.name} className="flex items-center gap-2">
@@ -70,7 +70,7 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
       else map[key].expense += tx.amount;
       map[key].net = map[key].income - map[key].expense;
     });
-    return Object.values(map);
+    return Object.keys(map).sort().map(key => map[key]);
   }, [transactions]);
 
   const categoryData = useMemo(() => {
@@ -162,26 +162,16 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={monthlyData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="incGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#EF4444" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
-                </linearGradient>
-              </defs>
+            <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${currencySymbol}${(v / 1000).toFixed(0)}k`} />
-              <Tooltip content={renderTooltip} />
+              <Tooltip content={renderTooltip} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
 
               <Legend iconType="circle" iconSize={8} />
-              <Area type="monotone" dataKey="income" name="Income" stroke="#10B981" strokeWidth={2} fill="url(#incGrad)" />
-              <Area type="monotone" dataKey="expense" name="Expense" stroke="#EF4444" strokeWidth={2} fill="url(#expGrad)" />
-            </AreaChart>
+              <Bar dataKey="income" name="Income" fill="#10B981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expense" name="Expense" fill="#EF4444" radius={[4, 4, 0, 0]} />
+            </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
