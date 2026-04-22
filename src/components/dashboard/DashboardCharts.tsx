@@ -144,32 +144,32 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
 
       <div className="rounded-xl bg-card p-5">
         <p className="text-base font-semibold tracking-tight mb-4">Spending Trend</p>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart
-            data={[...spendingData].sort((a, b) => {
-              const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-              return months.indexOf(a.month) - months.indexOf(b.month);
-            })}
-            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="month"
-              tick={{ fontSize: 11 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11 }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(v) => {
-                const symbol = new Intl.NumberFormat("en-US", { style: "currency", currency }).formatToParts(0).find(p => p.type === 'currency')?.value || '$';
-                return `${symbol}${(v / 1000).toFixed(0)}k`;
-              }}
-            />
-            <Tooltip content={renderTooltip} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
-            <Legend iconType="circle" iconSize={8} verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: 10, fontSize: 12 }} />
+        <ResponsiveContainer width="100%" height={280}>
+            <BarChart
+              data={[...spendingData].sort((a, b) => {
+                const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                return months.indexOf(a.month) - months.indexOf(b.month);
+              })}
+              margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v) => {
+                  const symbol = new Intl.NumberFormat("en-US", { style: "currency", currency }).formatToParts(0).find(p => p.type === 'currency')?.value || '$';
+                  return `${symbol}${(v / 1000).toFixed(0)}k`;
+                }}
+              />
+              <Tooltip content={renderTooltip} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ paddingTop: 20, fontSize: 12 }} />
             <Bar
               dataKey="income"
               name="Income"
@@ -193,14 +193,14 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
             No expense data yet
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
+          <ResponsiveContainer width="100%" height={280}>
+            <PieChart margin={{ top: 0, bottom: 0 }}>
               <Pie
                 data={categoryData}
                 cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={90}
+                cy="45%"
+                innerRadius={55}
+                outerRadius={80}
                 paddingAngle={3}
                 dataKey="value"
                 stroke="none"

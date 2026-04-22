@@ -162,7 +162,7 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={monthlyData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${currencySymbol}${(v / 1000).toFixed(0)}k`} />
@@ -188,9 +188,18 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
                 No expense data
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={240}>
-                <PieChart>
-                  <Pie data={categoryData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value" stroke="none">
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart margin={{ top: 0, bottom: 0 }}>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="45%"
+                    innerRadius={55}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                    stroke="none"
+                  >
                     {categoryData.map((entry, i) => (
                       <Cell key={entry.name} fill={entry.color || CHART_COLORS[i % CHART_COLORS.length]} stroke="none" />
                     ))}
@@ -213,8 +222,8 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
                 No data available
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={topCategories} layout="vertical" margin={{ top: 0, right: 20, left: 60, bottom: 0 }}>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={topCategories} layout="vertical" margin={{ top: 20, right: 20, left: 60, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => formatCurrency(v, currency)} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={55} />
@@ -236,7 +245,7 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
           <CardTitle>Net Savings by Month</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart data={monthlyData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
