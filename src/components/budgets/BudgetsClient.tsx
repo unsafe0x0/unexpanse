@@ -34,8 +34,8 @@ interface Budget {
   name: string;
   amount: number;
   period: string;
-  categoryId: string | null;
-  category: Category | null;
+  categoryId?: string | null;
+  category?: Category | null;
 }
 
 interface BudgetsClientProps {

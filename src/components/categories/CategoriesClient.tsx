@@ -46,7 +46,7 @@ interface Category {
   name: string;
   icon: string;
   color: string;
-  isDefault: boolean;
+  isDefault?: boolean;
 }
 
 interface CategoriesClientProps {

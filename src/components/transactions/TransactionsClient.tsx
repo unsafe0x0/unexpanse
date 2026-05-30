@@ -304,11 +304,11 @@ export function TransactionsClient({
 
     // Net Card
     const netX = expenseX + colWidth + cardSpacing;
-    const netColor = net >= 0 ? [245, 250, 245] : [255, 245, 245];
-    doc.setFillColor(...netColor);
+    if (net >= 0) doc.setFillColor(245, 250, 245);
+    else doc.setFillColor(255, 245, 245);
     doc.rect(netX, y, colWidth, cardHeight, "F");
-    const netBorderColor = net >= 0 ? [200, 255, 200] : [255, 200, 200];
-    doc.setDrawColor(...netBorderColor);
+    if (net >= 0) doc.setDrawColor(200, 255, 200);
+    else doc.setDrawColor(255, 200, 200);
     doc.setLineWidth(0.3);
     doc.rect(netX, y, colWidth, cardHeight);
     doc.setFont("times", "normal");

@@ -25,15 +25,15 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 interface UserData {
-  id: string;
-  name: string | null;
-  email: string | null;
-  currency: string;
-  image: string | null;
-  createdAt: Date;
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  currency?: string;
+  image?: string | null;
+  createdAt?: Date;
 }
 
-export function SettingsClient({ user }: { user: UserData }) {
+export function SettingsClient({ user }: { user?: UserData | null }) {
   const { theme, setTheme } = useTheme();
   const { update: updateSession } = useSession();
   const [mounted, setMounted] = useState(false);
