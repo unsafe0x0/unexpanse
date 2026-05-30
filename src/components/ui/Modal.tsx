@@ -37,7 +37,7 @@ export function Modal({
     (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     },
-    [onClose]
+    [onClose],
   );
 
   useEffect(() => {
@@ -55,7 +55,6 @@ export function Modal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-
       <div
         ref={overlayRef}
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -68,14 +67,13 @@ export function Modal({
         aria-modal
         aria-labelledby={title ? "modal-title" : undefined}
         className={cn(
-          "relative z-10 w-full rounded-2xl border border-border bg-card shadow-2xl",
+          "relative z-10 w-full rounded-lg border border-border bg-card shadow-lg",
           "animate-in fade-in-0 zoom-in-95 duration-200",
-          sizeMap[size]
+          sizeMap[size],
         )}
       >
-
         {(title || showCloseButton) && (
-          <div className="flex items-start justify-between p-6 pb-4">
+          <div className="flex items-start justify-between p-6 border-b border-border">
             <div>
               {title && (
                 <h2 id="modal-title" className="text-lg font-semibold">
@@ -83,7 +81,9 @@ export function Modal({
                 </h2>
               )}
               {description && (
-                <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {description}
+                </p>
               )}
             </div>
             {showCloseButton && (
@@ -100,7 +100,7 @@ export function Modal({
           </div>
         )}
 
-        <div className={cn("px-6 pb-6", !title && !showCloseButton && "pt-6")}>
+        <div className={cn("px-6 py-6", !title && !showCloseButton && "pt-6")}>
           {children}
         </div>
       </div>
@@ -131,8 +131,8 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
-      <p className="text-sm text-muted-foreground mb-5">{description}</p>
-      <div className="flex gap-2 justify-end">
+      <p className="text-sm text-muted-foreground mb-6">{description}</p>
+      <div className="flex gap-3 justify-end">
         <Button variant="outline" onClick={onClose} disabled={isLoading}>
           Cancel
         </Button>

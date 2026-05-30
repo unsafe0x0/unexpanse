@@ -11,18 +11,17 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-foreground text-background hover:bg-foreground/90 shadow-sm active:scale-[0.98]",
+          "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border active:scale-[0.98]",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border active:scale-95",
         outline:
-          "border border-border bg-transparent hover:bg-accent text-foreground active:scale-[0.98]",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground text-foreground active:scale-[0.98]",
+          "border border-border bg-transparent hover:bg-secondary text-foreground active:scale-95",
+        ghost: "hover:bg-secondary text-foreground active:scale-95",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98]",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-95",
         success:
-          "bg-emerald-500 text-white hover:bg-emerald-600 active:scale-[0.98]",
-        link: "text-foreground underline-offset-4 hover:underline",
+          "bg-emerald-500 text-white hover:bg-emerald-600 active:scale-95",
+        link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -36,11 +35,12 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -49,8 +49,18 @@ export interface ButtonProps
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { className, variant, size, isLoading, leftIcon, rightIcon, children, disabled, ...props },
-    ref
+    {
+      className,
+      variant,
+      size,
+      isLoading,
+      leftIcon,
+      rightIcon,
+      children,
+      disabled,
+      ...props
+    },
+    ref,
   ) => {
     return (
       <button
@@ -68,7 +78,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!isLoading && rightIcon}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

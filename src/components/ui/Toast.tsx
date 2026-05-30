@@ -3,13 +3,13 @@
 import { useToastStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { CheckCircle, XCircle, Warning, Info, X } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 const toastIcons = {
   success: <CheckCircle size={16} weight="fill" className="text-emerald-500" />,
-  error:   <XCircle   size={16} weight="fill" className="text-red-500" />,
-  warning: <Warning   size={16} weight="fill" className="text-amber-500" />,
-  info:    <Info      size={16} weight="fill" className="text-blue-500" />,
+  error: <XCircle size={16} weight="fill" className="text-red-500" />,
+  warning: <Warning size={16} weight="fill" className="text-amber-500" />,
+  info: <Info size={16} weight="fill" className="text-blue-500" />,
 };
 
 const toastBorder = {
@@ -45,7 +45,7 @@ function ToastItem({ id, title, description, type }: ToastItemProps) {
         "flex items-start gap-3 w-full max-w-sm rounded-xl border bg-card p-4 shadow-lg",
         "transition-all duration-200",
         toastBorder[type],
-        isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
+        isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4",
       )}
     >
       <div className="shrink-0 mt-0.5">{toastIcons[type]}</div>
@@ -87,7 +87,8 @@ export function ToastContainer() {
 
 export function useToast() {
   const { addToast } = useToastStore();
-  return {
+
+  return useMemo(() => ({
     toast: {
       success: (title: string, description?: string) =>
         addToast({ type: "success", title, description }),
@@ -98,5 +99,5 @@ export function useToast() {
       info: (title: string, description?: string) =>
         addToast({ type: "info", title, description }),
     },
-  };
+  }), [addToast]);
 }

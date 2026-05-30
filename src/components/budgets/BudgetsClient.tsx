@@ -12,7 +12,13 @@ import { useToast } from "@/components/ui/Toast";
 import { createBudget, updateBudget, deleteBudget } from "@/actions/budgets";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { Plus, PencilSimple, Trash, Target, Warning } from "@phosphor-icons/react";
+import {
+  Plus,
+  PencilSimple,
+  Trash,
+  Target,
+  Warning,
+} from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 
@@ -39,7 +45,12 @@ interface BudgetsClientProps {
   currency?: string;
 }
 
-export function BudgetsClient({ budgets: initial, categories, spending, currency = "INR" }: BudgetsClientProps) {
+export function BudgetsClient({
+  budgets: initial,
+  categories,
+  spending,
+  currency = "INR",
+}: BudgetsClientProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [budgets, setBudgets] = useState(initial);
@@ -77,8 +88,10 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!form.name.trim()) newErrors.name = "Name required";
-    if (!form.amount || isNaN(parseFloat(form.amount))) newErrors.amount = "Valid amount required";
-    else if (parseFloat(form.amount) <= 0) newErrors.amount = "Amount must be positive";
+    if (!form.amount || isNaN(parseFloat(form.amount)))
+      newErrors.amount = "Valid amount required";
+    else if (parseFloat(form.amount) <= 0)
+      newErrors.amount = "Amount must be positive";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -100,13 +113,16 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
         await updateBudget(editingBudget.id, data);
         setBudgets((prev) =>
           prev.map((b) =>
-            b.id === editingBudget.id ? { 
-              ...b, 
-              ...data, 
-              categoryId: data.categoryId || null,
-              category: categories.find(c => c.id === data.categoryId) || null
-            } : b
-          )
+            b.id === editingBudget.id
+              ? {
+                  ...b,
+                  ...data,
+                  categoryId: data.categoryId || null,
+                  category:
+                    categories.find((c) => c.id === data.categoryId) || null,
+                }
+              : b,
+          ),
         );
         toast.success("Budget updated");
       } else {
@@ -145,7 +161,9 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
     ...categories.map((c) => ({
       value: c.id,
       label: c.name,
-      icon: <CategoryIcon name={c.icon} size={14} />,
+      icon: (
+        <CategoryIcon name={c.icon} size={14} className="text-foreground" />
+      ),
     })),
   ];
 
@@ -158,7 +176,11 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <Button onClick={openCreate} leftIcon={<Plus className="h-4 w-4" />} id="create-budget-btn">
+        <Button
+          onClick={openCreate}
+          leftIcon={<Plus className="h-4 w-4" />}
+          id="create-budget-btn"
+        >
           New budget
         </Button>
       </div>
@@ -166,10 +188,14 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
       {budgets.length === 0 ? (
         <div className="rounded-xl border border-border">
           <EmptyState
-            icon={<Target className="h-8 w-8 text-muted-foreground" />}
+            icon={<Target className="h-8 w-8 text-foreground" />}
             title="No budgets yet"
             description="Create budgets to keep your spending in check."
-            action={{ label: "Create budget", onClick: openCreate, leftIcon: <Plus className="h-4 w-4" /> }}
+            action={{
+              label: "Create budget",
+              onClick: openCreate,
+              leftIcon: <Plus className="h-4 w-4" />,
+            }}
           />
         </div>
       ) : (
@@ -184,7 +210,7 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
                 key={budget.id}
                 className={cn(
                   "group rounded-xl border bg-card p-5 transition-all duration-200 hover:shadow-md",
-                  isOver ? "border-red-500/40" : "border-border"
+                  isOver ? "border-red-500/40" : "border-border",
                 )}
               >
                 <div className="flex items-start justify-between mb-3">
@@ -214,15 +240,15 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
                   <div className="hidden group-hover:flex items-center gap-1">
                     <button
                       onClick={() => openEdit(budget)}
-                      className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                      className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
                     >
-                <PencilSimple size={14} />
+                      <PencilSimple size={14} />
                     </button>
                     <button
                       onClick={() => setDeletingId(budget.id)}
-                      className="p-1.5 rounded-md hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+                      className="p-1.5 rounded-md hover:bg-red-500/10 text-foreground hover:text-red-500 transition-colors"
                     >
-                <Trash size={14} />
+                      <Trash size={14} />
                     </button>
                   </div>
                 </div>
@@ -238,14 +264,24 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
                     <span className="text-muted-foreground">
                       {fmt(spent)} spent
                     </span>
-                    <span className={cn(isOver ? "text-red-500 font-medium" : "text-muted-foreground")}>
-                      {isOver ? `${fmt(Math.abs(remaining))} over` : `${fmt(remaining)} left`}
+                    <span
+                      className={cn(
+                        isOver
+                          ? "text-red-500 font-medium"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      {isOver
+                        ? `${fmt(Math.abs(remaining))} over`
+                        : `${fmt(remaining)} left`}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold">{fmt(budget.amount)}</span>
+                  <span className="text-lg font-bold">
+                    {fmt(budget.amount)}
+                  </span>
                   {isOver && (
                     <div className="flex items-center gap-1 text-xs text-red-500 font-medium">
                       <Warning size={14} />
@@ -284,7 +320,13 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
             value={form.amount}
             onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
             error={errors.amount}
-            leftIcon={<span className="text-xs text-muted-foreground">{new Intl.NumberFormat('en-US', { style: 'currency', currency }).formatToParts(0).find(p => p.type === 'currency')?.value || '$'}</span>}
+            leftIcon={
+              <span className="text-xs text-muted-foreground">
+                {new Intl.NumberFormat("en-US", { style: "currency", currency })
+                  .formatToParts(0)
+                  .find((p) => p.type === "currency")?.value || "$"}
+              </span>
+            }
           />
           <div className="grid grid-cols-2 gap-3">
             <Select
@@ -304,7 +346,12 @@ export function BudgetsClient({ budgets: initial, categories, spending, currency
             />
           </div>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setModalOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => setModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" className="flex-1" isLoading={isLoading}>

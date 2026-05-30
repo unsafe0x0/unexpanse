@@ -7,7 +7,10 @@ import { ToastContainer } from "@/components/ui/Toast";
 import { Inter, JetBrains_Mono } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
 export const metadata: Metadata = {
   title: {
     default: "unexpanse — Smart Expense Tracker",
@@ -15,7 +18,12 @@ export const metadata: Metadata = {
   },
   description:
     "Track your expenses, manage budgets, and gain financial clarity with unexpanse — the premium personal finance tracker.",
-  keywords: ["expense tracker", "budget", "personal finance", "money management"],
+  keywords: [
+    "expense tracker",
+    "budget",
+    "personal finance",
+    "money management",
+  ],
   authors: [{ name: "unexpanse" }],
   creator: "unexpanse",
   openGraph: {
@@ -38,9 +46,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-      </head>
-      <body className={`min-h-screen bg-background antialiased ${inter.variable} ${jetbrainsMono.variable}`}>
+      <head></head>
+      <body
+        suppressHydrationWarning
+        className={`min-h-screen bg-background antialiased ${inter.variable} ${jetbrainsMono.variable}`}
+      >
         <AuthProvider>
           <ThemeProvider
             attribute="class"

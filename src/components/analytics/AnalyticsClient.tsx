@@ -4,17 +4,28 @@ import { useMemo, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
-  AreaChart, Area,
-  BarChart, Bar,
-  PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { CHART_COLORS } from "@/lib/constants";
 import { formatCurrency, getMonthName } from "@/lib/utils";
 import { DownloadSimple } from "@phosphor-icons/react";
 import type { TooltipContentProps } from "recharts";
-import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
+import type {
+  ValueType,
+  NameType,
+} from "recharts/types/component/DefaultTooltipContent";
 
 interface Transaction {
   id: string;
@@ -39,17 +50,31 @@ interface AnalyticsClientProps {
 }
 
 function CustomTooltip({
-  active, payload, label, currency,
+  active,
+  payload,
+  label,
+  currency,
 }: TooltipContentProps<ValueType, NameType> & { currency: string }) {
   if (active && payload?.length) {
     return (
       <div className="rounded-lg border border-border bg-card p-3 shadow-lg text-sm text-card-foreground">
         <p className="font-medium mb-1.5">{label}</p>
-        {(payload as unknown as Array<{ name: string; value: number; color: string }>).map((e) => (
+        {(
+          payload as unknown as Array<{
+            name: string;
+            value: number;
+            color: string;
+          }>
+        ).map((e) => (
           <div key={e.name} className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full" style={{ background: e.color }} />
+            <div
+              className="h-2 w-2 rounded-full"
+              style={{ background: e.color }}
+            />
             <span className="text-muted-foreground capitalize">{e.name}:</span>
-            <span className="font-medium">{formatCurrency(e.value, currency)}</span>
+            <span className="font-medium">
+              {formatCurrency(e.value, currency)}
+            </span>
           </div>
         ))}
       </div>
@@ -58,23 +83,37 @@ function CustomTooltip({
   return null;
 }
 
-export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsClientProps) {
+export function AnalyticsClient({
+  transactions,
+  currency = "INR",
+}: AnalyticsClientProps) {
   const monthlyData = useMemo(() => {
-    const map: Record<string, { month: string; income: number; expense: number; net: number }> = {};
+    const map: Record<
+      string,
+      { month: string; income: number; expense: number; net: number }
+    > = {};
     transactions.forEach((tx) => {
       const d = new Date(tx.date);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      const monthName = getMonthName(d.getMonth() + 1).slice(0, 3);
-      if (!map[key]) map[key] = { month: monthName, income: 0, expense: 0, net: 0 };
+      const year = d.getUTCFullYear();
+      const month = d.getUTCMonth();
+      const key = `${year}-${String(month + 1).padStart(2, "0")}`;
+      const monthName = getMonthName(month + 1).slice(0, 3);
+      if (!map[key])
+        map[key] = { month: monthName, income: 0, expense: 0, net: 0 };
       if (tx.type === "INCOME") map[key].income += tx.amount;
       else map[key].expense += tx.amount;
       map[key].net = map[key].income - map[key].expense;
     });
-    return Object.keys(map).sort().map(key => map[key]);
+    return Object.keys(map)
+      .sort()
+      .map((key) => map[key]);
   }, [transactions]);
 
   const categoryData = useMemo(() => {
-    const map: Record<string, { name: string; value: number; color: string; icon: string }> = {};
+    const map: Record<
+      string,
+      { name: string; value: number; color: string; icon: string }
+    > = {};
     transactions
       .filter((tx) => tx.type === "EXPENSE" && tx.category)
       .forEach((tx) => {
@@ -89,13 +128,19 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
         }
         map[catId].value += tx.amount;
       });
-    return Object.values(map).sort((a, b) => b.value - a.value).slice(0, 8);
+    return Object.values(map)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
   }, [transactions]);
 
   const topCategories = categoryData.slice(0, 5);
 
-  const totalIncome = transactions.filter((t) => t.type === "INCOME").reduce((s, t) => s + t.amount, 0);
-  const totalExpense = transactions.filter((t) => t.type === "EXPENSE").reduce((s, t) => s + t.amount, 0);
+  const totalIncome = transactions
+    .filter((t) => t.type === "INCOME")
+    .reduce((s, t) => s + t.amount, 0);
+  const totalExpense = transactions
+    .filter((t) => t.type === "EXPENSE")
+    .reduce((s, t) => s + t.amount, 0);
 
   const handleExportCSV = () => {
     const headers = ["Date", "Type", "Description", "Category", "Amount"];
@@ -118,28 +163,47 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
 
   const currencySymbol = useMemo(() => {
     try {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency }).formatToParts(0).find(p => p.type === 'currency')?.value || '$';
+      return (
+        new Intl.NumberFormat("en-US", { style: "currency", currency })
+          .formatToParts(0)
+          .find((p) => p.type === "currency")?.value || "$"
+      );
     } catch {
-      return '$';
+      return "$";
     }
   }, [currency]);
 
   const renderTooltip = useCallback(
-    (props: TooltipContentProps<ValueType, NameType>) => <CustomTooltip {...props} currency={currency} />,
-    [currency]
+    (props: TooltipContentProps<ValueType, NameType>) => (
+      <CustomTooltip {...props} currency={currency} />
+    ),
+    [currency],
   );
 
   return (
     <div className="space-y-6">
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: "Total Income", value: formatCurrency(totalIncome, currency), color: "text-emerald-500" },
-          { label: "Total Expenses", value: formatCurrency(totalExpense, currency), color: "text-red-500" },
-          { label: "Net Savings", value: formatCurrency(totalIncome - totalExpense, currency), color: "" },
+          {
+            label: "Total Income",
+            value: formatCurrency(totalIncome, currency),
+            color: "text-emerald-500",
+          },
+          {
+            label: "Total Expenses",
+            value: formatCurrency(totalExpense, currency),
+            color: "text-red-500",
+          },
+          {
+            label: "Net Savings",
+            value: formatCurrency(totalIncome - totalExpense, currency),
+            color: "",
+          },
         ].map((s) => (
           <Card key={s.label} padding="default">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{s.label}</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              {s.label}
+            </p>
             <p className={`mt-1.5 text-2xl font-bold ${s.color}`}>{s.value}</p>
           </Card>
         ))}
@@ -162,22 +226,49 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={monthlyData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+            <BarChart
+              data={monthlyData}
+              margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${currencySymbol}${(v / 1000).toFixed(0)}k`} />
-              <Tooltip content={renderTooltip} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v) =>
+                  `${currencySymbol}${(v / 1000).toFixed(0)}k`
+                }
+              />
+              <Tooltip
+                content={renderTooltip}
+                cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
+              />
 
               <Legend iconType="circle" iconSize={8} />
-              <Bar dataKey="income" name="Income" fill="#10B981" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="expense" name="Expense" fill="#EF4444" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="income"
+                name="Income"
+                fill="#10B981"
+                radius={[4, 4, 0, 0]}
+              />
+              <Bar
+                dataKey="expense"
+                name="Expense"
+                fill="#EF4444"
+                radius={[4, 4, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
         <Card>
           <CardHeader>
             <CardTitle>Spending by Category</CardTitle>
@@ -201,11 +292,26 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
                     stroke="none"
                   >
                     {categoryData.map((entry, i) => (
-                      <Cell key={entry.name} fill={entry.color || CHART_COLORS[i % CHART_COLORS.length]} stroke="none" />
+                      <Cell
+                        key={entry.name}
+                        fill={
+                          entry.color || CHART_COLORS[i % CHART_COLORS.length]
+                        }
+                        stroke="none"
+                      />
                     ))}
                   </Pie>
-                  <Legend iconType="circle" iconSize={8} formatter={(v) => <span style={{ fontSize: 11 }}>{v}</span>} />
-                  <Tooltip formatter={(v: unknown) => [formatCurrency(v as number, currency), "Spent"]} />
+                  <Legend
+                    iconType="circle"
+                    iconSize={8}
+                    formatter={(v) => <span style={{ fontSize: 11 }}>{v}</span>}
+                  />
+                  <Tooltip
+                    formatter={(v: unknown) => [
+                      formatCurrency(v as number, currency),
+                      "Spent",
+                    ]}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             )}
@@ -223,14 +329,42 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
               </div>
             ) : (
               <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={topCategories} layout="vertical" margin={{ top: 20, right: 20, left: 60, bottom: 0 }}>
+                <BarChart
+                  data={topCategories}
+                  layout="vertical"
+                  margin={{ top: 20, right: 20, left: 60, bottom: 0 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => formatCurrency(v, currency)} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={55} />
-                  <Tooltip cursor={{ fill: 'transparent' }} formatter={(v: unknown) => [formatCurrency(v as number, currency), "Spent"]} />
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => formatCurrency(v, currency)}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={55}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "transparent" }}
+                    formatter={(v: unknown) => [
+                      formatCurrency(v as number, currency),
+                      "Spent",
+                    ]}
+                  />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                     {topCategories.map((entry, i) => (
-                      <Cell key={entry.name} fill={entry.color || CHART_COLORS[i % CHART_COLORS.length]} />
+                      <Cell
+                        key={entry.name}
+                        fill={
+                          entry.color || CHART_COLORS[i % CHART_COLORS.length]
+                        }
+                      />
                     ))}
                   </Bar>
                 </BarChart>
@@ -246,11 +380,32 @@ export function AnalyticsClient({ transactions, currency = "INR" }: AnalyticsCli
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={monthlyData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+            <BarChart
+              data={monthlyData}
+              margin={{ top: 0, right: 0, left: -20, bottom: 0 }}
+            >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${currencySymbol}${(v / 1000).toFixed(0)}k`} />
-              <Tooltip cursor={{ fill: 'transparent' }} formatter={(v: unknown) => [formatCurrency(v as number, currency), "Net"]} />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v) =>
+                  `${currencySymbol}${(v / 1000).toFixed(0)}k`
+                }
+              />
+              <Tooltip
+                cursor={{ fill: "transparent" }}
+                formatter={(v: unknown) => [
+                  formatCurrency(v as number, currency),
+                  "Net",
+                ]}
+              />
               <Bar dataKey="net" radius={[4, 4, 0, 0]}>
                 {monthlyData.map((entry, i) => (
                   <Cell key={i} fill={entry.net >= 0 ? "#10B981" : "#EF4444"} />

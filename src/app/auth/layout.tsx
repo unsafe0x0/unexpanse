@@ -6,7 +6,11 @@ export const metadata: Metadata = {
   title: "Sign In",
 };
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="min-h-screen flex">
       <div className="hidden lg:flex lg:w-1/2 bg-card border-r border-border relative overflow-hidden flex-col">
@@ -34,16 +38,26 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                   beautifully tracked.
                 </h1>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
-                  Take control of your spending, set smart budgets, and visualize
-                  your financial health — all in one elegant dashboard.
+                  Take control of your spending, set smart budgets, and
+                  visualize your financial health — all in one elegant
+                  dashboard.
                 </p>
               </div>
 
               <div className="space-y-4">
                 {[
-                  { icon: <ChartBar size={16} weight="duotone" />, label: "Smart analytics & reports" },
-                  { icon: <Target   size={16} weight="duotone" />, label: "Budget tracking & alerts" },
-                  { icon: <Lightning size={16} weight="duotone" />, label: "Real-time expense logging" },
+                  {
+                    icon: <ChartBar size={16} weight="duotone" />,
+                    label: "Smart analytics & reports",
+                  },
+                  {
+                    icon: <Target size={16} weight="duotone" />,
+                    label: "Budget tracking & alerts",
+                  },
+                  {
+                    icon: <Lightning size={16} weight="duotone" />,
+                    label: "Real-time expense logging",
+                  },
                 ].map((feature) => (
                   <div key={feature.label} className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center text-foreground">

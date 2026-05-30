@@ -61,10 +61,13 @@ export function DatePicker({
             className={cn(
               "w-full justify-start text-left font-normal border-border bg-background px-3 py-2",
               !value && "text-muted-foreground",
-              error && "border-destructive focus:ring-destructive"
+              error && "border-destructive focus:ring-destructive",
             )}
           >
-            <CalendarBlank size={16} className="mr-2 shrink-0" />
+            <CalendarBlank
+              size={16}
+              className="mr-2 shrink-0 text-foreground"
+            />
             {dateValue ? format(dateValue, "PPP") : <span>Pick a date</span>}
           </Button>
         </PopoverTrigger>

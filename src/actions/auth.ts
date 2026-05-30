@@ -51,17 +51,14 @@ export async function registerUser(data: {
   return { success: true, userId: user.id };
 }
 
-export async function updateProfile(data: {
-  name: string;
-  currency: string;
-}) {
+export async function updateProfile(data: { name: string; currency: string }) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
 
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { 
-      name: data.name, 
+    data: {
+      name: data.name,
       currency: data.currency,
       image: `https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${encodeURIComponent(data.name)}`,
     },

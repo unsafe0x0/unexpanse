@@ -51,7 +51,7 @@ export function TransactionModal({
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [type, setType] = useState<"INCOME" | "EXPENSE">(
-    initialData?.type ?? "EXPENSE"
+    initialData?.type ?? "EXPENSE",
   );
   const [form, setForm] = useState({
     amount: initialData?.amount?.toString() ?? "",
@@ -65,15 +65,14 @@ export function TransactionModal({
 
   const isEditing = !!initialData?.id;
 
-
-
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!form.amount || isNaN(parseFloat(form.amount)))
       newErrors.amount = "Valid amount required";
     else if (parseFloat(form.amount) <= 0)
       newErrors.amount = "Amount must be positive";
-    if (!form.description.trim()) newErrors.description = "Description required";
+    if (!form.description.trim())
+      newErrors.description = "Description required";
     if (!form.date) newErrors.date = "Date required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -104,7 +103,9 @@ export function TransactionModal({
       } else {
         toast.success(
           isEditing ? "Transaction updated" : "Transaction added",
-          isEditing ? "Changes saved successfully." : `${type === "INCOME" ? "Income" : "Expense"} recorded.`
+          isEditing
+            ? "Changes saved successfully."
+            : `${type === "INCOME" ? "Income" : "Expense"} recorded.`,
         );
         if (!isEditing) {
           setForm({
@@ -129,7 +130,7 @@ export function TransactionModal({
   const categoryOptions = categories.map((c) => ({
     value: c.id,
     label: c.name,
-    icon: <CategoryIcon name={c.icon} size={14} />,
+    icon: <CategoryIcon name={c.icon} size={14} className="text-foreground" />,
   }));
 
   const paymentOptions = PAYMENT_METHODS.map((m) => ({ value: m, label: m }));
@@ -142,7 +143,6 @@ export function TransactionModal({
       size="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-
         <Tabs
           items={[
             { value: "EXPENSE", label: "Expense" },
@@ -184,7 +184,6 @@ export function TransactionModal({
         />
 
         <div className="grid grid-cols-2 gap-3">
-
           <Select
             id="tx-category"
             label="Category"
@@ -237,7 +236,9 @@ export function TransactionModal({
             isLoading={isLoading}
             id="tx-submit"
           >
-            {isEditing ? "Save changes" : `Add ${type === "INCOME" ? "income" : "expense"}`}
+            {isEditing
+              ? "Save changes"
+              : `Add ${type === "INCOME" ? "income" : "expense"}`}
           </Button>
         </div>
       </form>

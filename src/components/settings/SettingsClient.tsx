@@ -12,7 +12,15 @@ import { CURRENCIES } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { UserCircle, Palette, Trash, Sun, Moon, Desktop, Minus } from "@phosphor-icons/react";
+import {
+  UserCircle,
+  Palette,
+  Trash,
+  Sun,
+  Moon,
+  Desktop,
+  Minus,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
@@ -25,11 +33,7 @@ interface UserData {
   createdAt: Date;
 }
 
-export function SettingsClient({
-  user,
-}: {
-  user: UserData;
-}) {
+export function SettingsClient({ user }: { user: UserData }) {
   const { theme, setTheme } = useTheme();
   const { update: updateSession } = useSession();
   const [mounted, setMounted] = useState(false);
@@ -50,7 +54,10 @@ export function SettingsClient({
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) { toast.error("Name is required"); return; }
+    if (!form.name.trim()) {
+      toast.error("Name is required");
+      return;
+    }
     setIsLoading(true);
     try {
       const result = await updateProfile(form);
@@ -85,30 +92,31 @@ export function SettingsClient({
   }));
 
   const themeOptions = [
-    { value: "light",  label: "Light",  icon: <Sun     size={16} /> },
-    { value: "dark",   label: "Dark",   icon: <Moon    size={16} /> },
+    { value: "light", label: "Light", icon: <Sun size={16} /> },
+    { value: "dark", label: "Dark", icon: <Moon size={16} /> },
     { value: "system", label: "System", icon: <Desktop size={16} /> },
   ];
 
   return (
     <div className="space-y-6">
-
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
-              <UserCircle size={16} className="text-muted-foreground" />
+              <UserCircle size={16} className="text-foreground" />
             </div>
             <CardTitle>Profile</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSaveProfile} className="space-y-4">
-
             <div className="flex items-center gap-4 pb-2">
               <div className="relative flex h-14 w-14 overflow-hidden items-center justify-center rounded-full bg-foreground text-background">
                 <Image
-                  src={user?.image || `https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${encodeURIComponent(form.name || "User")}`}
+                  src={
+                    user?.image ||
+                    `https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${encodeURIComponent(form.name || "User")}`
+                  }
                   alt={form.name || "Avatar"}
                   fill
                   className="object-cover"
@@ -118,7 +126,12 @@ export function SettingsClient({
               <div>
                 <p className="text-sm font-medium">{user?.email}</p>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : <Minus size={12} />}
+                  Member since{" "}
+                  {user?.createdAt ? (
+                    new Date(user.createdAt).getFullYear()
+                  ) : (
+                    <Minus size={12} />
+                  )}
                 </p>
               </div>
             </div>
@@ -154,7 +167,7 @@ export function SettingsClient({
         <CardHeader>
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
-              <Palette size={16} className="text-muted-foreground" />
+              <Palette size={16} className="text-foreground" />
             </div>
             <CardTitle>Appearance</CardTitle>
           </div>
@@ -173,7 +186,7 @@ export function SettingsClient({
                   "flex flex-1 flex-col items-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all",
                   mounted && theme === opt.value
                     ? "border-foreground bg-foreground text-background"
-                    : "border-border hover:border-muted-foreground text-muted-foreground hover:text-foreground"
+                    : "border-border hover:border-muted-foreground text-muted-foreground hover:text-foreground",
                 )}
               >
                 {opt.icon}

@@ -55,7 +55,10 @@ export function Select({
   };
 
   return (
-    <div className={cn("flex flex-col gap-1.5 w-full", className)} ref={containerRef}>
+    <div
+      className={cn("flex flex-col gap-2 w-full", className)}
+      ref={containerRef}
+    >
       {label && (
         <label htmlFor={inputId} className="text-sm font-medium">
           {label}
@@ -71,12 +74,12 @@ export function Select({
           onKeyDown={handleKeyDown}
           onClick={() => setIsOpen((o) => !o)}
           className={cn(
-            "flex h-9 w-full items-center justify-between rounded-lg border border-border",
-            "bg-background px-3 py-2 text-sm transition-all duration-200",
-            "focus:outline-none focus:ring-2 focus:ring-ring",
+            "flex h-10 w-full items-center justify-between rounded-lg border border-border",
+            "bg-input px-3 py-2 text-sm transition-all duration-200",
+            "focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             error && "border-destructive",
-            !selected && "text-muted-foreground/60"
+            !selected && "text-muted-foreground",
           )}
         >
           <span className="flex items-center gap-2 truncate">
@@ -86,15 +89,15 @@ export function Select({
           <CaretDown
             size={16}
             className={cn(
-              "text-muted-foreground transition-transform duration-200 shrink-0",
-              isOpen && "rotate-180"
+              "text-foreground transition-transform duration-200 shrink-0",
+              isOpen && "rotate-180",
             )}
           />
         </button>
 
         {isOpen && (
-          <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-card shadow-xl overflow-hidden">
-            <ul role="listbox" className="max-h-52 overflow-y-auto py-1">
+          <div className="absolute z-50 mt-2 w-full rounded-lg border border-border bg-card shadow-lg overflow-hidden">
+            <ul role="listbox" className="max-h-56 overflow-y-auto py-1">
               {options.map((option) => (
                 <li
                   key={option.value}
@@ -106,8 +109,9 @@ export function Select({
                   }}
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 text-sm cursor-pointer",
-                    "hover:bg-accent transition-colors duration-100",
-                    option.value === value && "bg-accent font-medium"
+                    "hover:bg-secondary transition-colors duration-100",
+                    option.value === value &&
+                      "bg-primary text-primary-foreground font-medium",
                   )}
                 >
                   {option.icon}

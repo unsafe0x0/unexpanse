@@ -9,9 +9,11 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/Modal";
 import { TransactionModal } from "./TransactionModal";
 import { useToast } from "@/components/ui/Toast";
-import { deleteTransaction, deleteTransactions } from "@/actions/transactions";
+import { deleteTransaction, deleteTransactions, getTransactions } from "@/actions/transactions";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import Papa from "papaparse";
+import jsPDF from "jspdf";
 import {
   Plus,
   MagnifyingGlass,
@@ -22,9 +24,14 @@ import {
   CaretUp,
   CaretDown,
   Circle,
+  DownloadSimple,
+  FilePdf,
+  FileCsv,
 } from "@phosphor-icons/react";
 import { CategoryIcon } from "@/components/ui/CategoryIcon";
 import { useRouter } from "next/navigation";
+
+const PAGE_SIZE = 20;
 
 interface Transaction {
   id: string;
@@ -63,10 +70,11 @@ export function TransactionsClient({
   const router = useRouter();
   const { toast } = useToast();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
   const selectAll = (ids: string[]) => setSelectedIds(ids);
@@ -78,6 +86,7 @@ export function TransactionsClient({
   const [filterCategory, setFilterCategory] = useState("");
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -85,6 +94,22 @@ export function TransactionsClient({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const fmt = (n: number) => formatCurrency(n, currency);
+
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true);
+    try {
+      const result = await getTransactions({
+        limit: PAGE_SIZE,
+        offset: transactions.length,
+      });
+      setTransactions((prev) => [...prev, ...result.transactions]);
+      setDisplayCount((prev) => prev + PAGE_SIZE);
+    } catch {
+      toast.error("Failed to load more transactions");
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const filtered = useMemo(() => {
     return transactions
@@ -100,21 +125,32 @@ export function TransactionsClient({
       })
       .sort((a, b) => {
         let cmp = 0;
-        if (sortField === "date") cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
+        if (sortField === "date")
+          cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
         if (sortField === "amount") cmp = a.amount - b.amount;
-        if (sortField === "description") cmp = a.description.localeCompare(b.description);
+        if (sortField === "description")
+          cmp = a.description.localeCompare(b.description);
         return sortOrder === "asc" ? cmp : -cmp;
       });
   }, [transactions, search, filterType, filterCategory, sortField, sortOrder]);
 
   const handleSort = (field: SortField) => {
-    if (sortField === field) setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
-    else { setSortField(field); setSortOrder("desc"); }
+    if (sortField === field)
+      setSortOrder((o) => (o === "asc" ? "desc" : "asc"));
+    else {
+      setSortField(field);
+      setSortOrder("desc");
+    }
   };
 
   const renderSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowsDownUp size={14} className="opacity-40" />;
-    return sortOrder === "asc" ? <CaretUp size={14} /> : <CaretDown size={14} />;
+    if (sortField !== field)
+      return <ArrowsDownUp size={14} className="text-foreground" />;
+    return sortOrder === "asc" ? (
+      <CaretUp size={14} />
+    ) : (
+      <CaretDown size={14} />
+    );
   };
 
   const handleDelete = async () => {
@@ -137,7 +173,9 @@ export function TransactionsClient({
     setIsDeleting(true);
     try {
       await deleteTransactions(selectedIds);
-      setTransactions((prev) => prev.filter((t) => !selectedIds.includes(t.id)));
+      setTransactions((prev) =>
+        prev.filter((t) => !selectedIds.includes(t.id)),
+      );
       toast.success(`${selectedIds.length} transactions deleted`);
       clearSelection();
       router.refresh();
@@ -147,6 +185,242 @@ export function TransactionsClient({
       setIsDeleting(false);
       setBulkDeleteOpen(false);
     }
+  };
+
+  const exportCSV = () => {
+    const csvData = filtered.map((tx) => ({
+      Date: formatDate(tx.date),
+      Description: tx.description,
+      Category: tx.category?.name || "Uncategorized",
+      Type: tx.type,
+      Amount: tx.amount,
+      Note: tx.note || "",
+      "Payment Method": tx.paymentMethod || "",
+    }));
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "transactions.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Exported CSV successfully");
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.setCharSpace(0);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 15;
+    const contentWidth = pageWidth - 2 * margin;
+
+    const formatPdfAmount = (amount: number, showSign = true) => {
+      const number = new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+        .format(Math.abs(amount))
+        .replace(/\s/g, "");
+      const sign = showSign ? (amount >= 0 ? "+" : "-") : "";
+      return `${sign}${number}`;
+    };
+
+    // Calculate totals
+    const totalIncome = filtered
+      .filter((t) => t.type === "INCOME")
+      .reduce((s, t) => s + t.amount, 0);
+    const totalExpense = filtered
+      .filter((t) => t.type === "EXPENSE")
+      .reduce((s, t) => s + t.amount, 0);
+    const net = totalIncome - totalExpense;
+
+    // Premium Header
+    doc.setFont("times", "bold");
+    doc.setFontSize(32);
+    doc.setTextColor(0, 102, 255);
+    doc.text("unexpanse", margin, 25);
+
+    // Subtitle
+    doc.setFont("times", "normal");
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Financial Report", margin, 33);
+
+    // Date
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    doc.text(`Generated on ${currentDate}`, margin, 39);
+
+    // Decorative line
+    doc.setDrawColor(0, 102, 255);
+    doc.setLineWidth(0.8);
+    doc.line(margin, 41, pageWidth - margin, 41);
+
+    let y = 50;
+
+    // Summary Cards Section
+    const cardHeight = 16;
+    const cardSpacing = 3;
+    const colWidth = (contentWidth - 2 * cardSpacing) / 3;
+
+    // Income Card
+    doc.setFillColor(245, 250, 255);
+    doc.rect(margin, y, colWidth, cardHeight, "F");
+    doc.setDrawColor(200, 220, 255);
+    doc.setLineWidth(0.3);
+    doc.rect(margin, y, colWidth, cardHeight);
+    doc.setFont("times", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Total Income", margin + 3, y + 5);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(16, 185, 129);
+    doc.text(formatPdfAmount(totalIncome, true), margin + 3, y + 12);
+
+    // Expense Card
+    const expenseX = margin + colWidth + cardSpacing;
+    doc.setFillColor(255, 245, 245);
+    doc.rect(expenseX, y, colWidth, cardHeight, "F");
+    doc.setDrawColor(255, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.rect(expenseX, y, colWidth, cardHeight);
+    doc.setFont("times", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Total Expenses", expenseX + 3, y + 5);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(239, 68, 68);
+    doc.text(formatPdfAmount(-totalExpense, true), expenseX + 3, y + 12);
+
+    // Net Card
+    const netX = expenseX + colWidth + cardSpacing;
+    const netColor = net >= 0 ? [245, 250, 245] : [255, 245, 245];
+    doc.setFillColor(...netColor);
+    doc.rect(netX, y, colWidth, cardHeight, "F");
+    const netBorderColor = net >= 0 ? [200, 255, 200] : [255, 200, 200];
+    doc.setDrawColor(...netBorderColor);
+    doc.setLineWidth(0.3);
+    doc.rect(netX, y, colWidth, cardHeight);
+    doc.setFont("times", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text("Net Balance", netX + 3, y + 5);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(
+      net >= 0 ? 34 : 200,
+      net >= 0 ? 120 : 40,
+      net >= 0 ? 34 : 40,
+    );
+    const netSign = net >= 0 ? "+" : "-";
+    doc.text(formatPdfAmount(net, true), netX + 3, y + 12);
+
+    y += 26;
+
+    // Transactions heading
+    doc.setFont("times", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Transactions (${filtered.length} items)`, margin, y);
+
+    y += 7;
+
+    // Table header
+    doc.setFillColor(240, 240, 240);
+    doc.rect(margin, y - 3.5, contentWidth, 5.5, "F");
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.2);
+    doc.rect(margin, y - 3.5, contentWidth, 5.5);
+
+    doc.setFont("times", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(60, 60, 60);
+
+    const col1 = margin + 2;
+    const col2 = col1 + 20;
+    const col3 = col2 + 32;
+    const col4 = col3 + 30;
+    const amountX = margin + contentWidth - 2;
+
+    doc.text("Date", col1, y);
+    doc.text("Description", col2, y);
+    doc.text("Category", col3, y);
+    doc.text("Method", col4, y);
+    doc.text("Amount", amountX, y, { align: "right" });
+
+    y += 6;
+
+    // Transactions
+    doc.setFont("times", "normal");
+    doc.setFontSize(8);
+
+    let rowCount = 0;
+    filtered.forEach((tx) => {
+      if (y > pageHeight - 14) {
+        doc.setFont("times", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(150, 150, 150);
+        doc.text(
+          `Page ${doc.getNumberOfPages()}`,
+          pageWidth / 2,
+          pageHeight - 8,
+          { align: "center" },
+        );
+
+        doc.addPage();
+        y = 15;
+        rowCount = 0;
+      }
+
+      // Alternate row background
+      if (rowCount % 2 === 0) {
+        doc.setFillColor(250, 250, 250);
+        doc.setLineWidth(0);
+        doc.rect(margin, y - 3, contentWidth, 5, "F");
+      }
+
+      doc.setFont("times", "normal");
+      doc.setTextColor(60, 60, 60);
+      doc.text(formatDate(tx.date), col1, y);
+      doc.text(tx.description.substring(0, 18), col2, y);
+      doc.text(tx.category?.name || "—", col3, y);
+      doc.text(tx.paymentMethod || "—", col4, y);
+
+      const signedAmount = tx.type === "INCOME" ? tx.amount : -tx.amount;
+      const amountStr = formatPdfAmount(signedAmount, true);
+      doc.setFont("helvetica", tx.type === "INCOME" ? "bold" : "normal");
+      doc.setFontSize(7.5);
+      doc.setTextColor(
+        tx.type === "INCOME" ? 16 : 239,
+        tx.type === "INCOME" ? 185 : 68,
+        tx.type === "INCOME" ? 129 : 68,
+      );
+      doc.text(amountStr, amountX, y, { align: "right" });
+
+      y += 5;
+      rowCount++;
+    });
+
+    // Final footer
+    doc.setFont("times", "normal");
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150);
+    doc.text(`Page ${doc.getNumberOfPages()}`, pageWidth / 2, pageHeight - 8, {
+      align: "center",
+    });
+
+    doc.save("unexpanse-transactions.pdf");
+    toast.success("PDF exported successfully");
   };
 
   const typeOptions = [
@@ -165,34 +439,34 @@ export function TransactionsClient({
   ];
 
   const allIds = filtered.map((t) => t.id);
-  const allSelected = allIds.length > 0 && allIds.every((id) => selectedIds.includes(id));
+  const allSelected =
+    allIds.length > 0 && allIds.every((id) => selectedIds.includes(id));
 
   return (
-    <div className="space-y-4">
-
-      <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
         <Input
           id="tx-search"
           placeholder="Search transactions..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           leftIcon={<MagnifyingGlass size={16} />}
-          className="sm:w-72"
+          className="lg:w-80"
         />
-        <div className="flex gap-2 items-center flex-1">
+        <div className="flex gap-3 items-center flex-1">
           <Select
             id="tx-filter-type"
             options={typeOptions}
             value={filterType}
             onChange={setFilterType}
-            className="min-w-35 w-auto shrink-0"
+            className="min-w-36 w-auto shrink-0"
           />
           <Select
             id="tx-filter-category"
             options={categoryOptions}
             value={filterCategory}
             onChange={setFilterCategory}
-            className="min-w-44 w-auto shrink-0"
+            className="min-w-48 w-auto shrink-0"
           />
         </div>
         <div className="flex gap-2 ml-auto">
@@ -207,8 +481,29 @@ export function TransactionsClient({
             </Button>
           )}
           <Button
+            variant="outline"
             size="sm"
-            onClick={() => { setEditingTx(null); setModalOpen(true); }}
+            onClick={exportCSV}
+            leftIcon={<FileCsv size={14} />}
+            title="Export as CSV"
+          >
+            CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportPDF}
+            leftIcon={<FilePdf size={14} />}
+            title="Export as PDF"
+          >
+            PDF
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => {
+              setEditingTx(null);
+              setModalOpen(true);
+            }}
             leftIcon={<Plus size={14} weight="bold" />}
             id="add-transaction-btn"
           >
@@ -220,22 +515,36 @@ export function TransactionsClient({
       {filtered.length > 0 && (
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span>{filtered.length} transactions</span>
-          <Circle weight="fill" size={5} className="opacity-40" />
+          <Circle weight="fill" size={5} className="text-foreground" />
           <span className="text-emerald-500 font-medium">
-            +{fmt(filtered.filter(t => t.type === "INCOME").reduce((s, t) => s + t.amount, 0))}
+            +
+            {fmt(
+              filtered
+                .filter((t) => t.type === "INCOME")
+                .reduce((s, t) => s + t.amount, 0),
+            )}
           </span>
-          <Circle weight="fill" size={5} className="opacity-40" />
+          <Circle weight="fill" size={5} className="text-foreground" />
           <span className="text-red-500 font-medium">
-            -{fmt(filtered.filter(t => t.type === "EXPENSE").reduce((s, t) => s + t.amount, 0))}
+            -
+            {fmt(
+              filtered
+                .filter((t) => t.type === "EXPENSE")
+                .reduce((s, t) => s + t.amount, 0),
+            )}
           </span>
         </div>
       )}
 
       {filtered.length === 0 ? (
-        <div className="rounded-xl border border-border">
+        <div className="rounded-lg border border-border">
           <EmptyState
-            icon={<ArrowsLeftRight size={32} className="text-muted-foreground" />}
-            title={search || filterType || filterCategory ? "No results found" : "No transactions yet"}
+            icon={<ArrowsLeftRight size={32} className="text-foreground" />}
+            title={
+              search || filterType || filterCategory
+                ? "No results found"
+                : "No transactions yet"
+            }
             description={
               search || filterType || filterCategory
                 ? "Try adjusting your search or filters."
@@ -254,49 +563,50 @@ export function TransactionsClient({
           />
         </div>
       ) : (
-        <div className="rounded-xl border border-border overflow-hidden">
+        <div className="space-y-4">
+          <div className="rounded-lg border border-border overflow-hidden">
+            <div className="hidden md:grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-4 px-6 py-3 bg-muted/30 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={() =>
+                  allSelected ? clearSelection() : selectAll(allIds)
+                }
+                className="h-4 w-4 rounded"
+                aria-label="Select all"
+              />
+              <button
+                onClick={() => handleSort("description")}
+                className="flex items-center gap-1 text-left hover:text-foreground transition-colors"
+              >
+                Description {renderSortIcon("description")}
+              </button>
+              <span>Category</span>
+              <button
+                onClick={() => handleSort("date")}
+                className="flex items-center gap-1 hover:text-foreground transition-colors"
+              >
+                Date {renderSortIcon("date")}
+              </button>
+              <span>Method</span>
+              <button
+                onClick={() => handleSort("amount")}
+                className="flex items-center gap-1 hover:text-foreground transition-colors"
+              >
+                Amount {renderSortIcon("amount")}
+              </button>
+            </div>
 
-          <div className="hidden md:grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-3 px-4 py-2.5 bg-muted/30 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              onChange={() => allSelected ? clearSelection() : selectAll(allIds)}
-              className="h-4 w-4 rounded"
-              aria-label="Select all"
-            />
-            <button
-              onClick={() => handleSort("description")}
-              className="flex items-center gap-1 text-left hover:text-foreground transition-colors"
-            >
-              Description {renderSortIcon("description")}
-            </button>
-            <span>Category</span>
-            <button
-              onClick={() => handleSort("date")}
-              className="flex items-center gap-1 hover:text-foreground transition-colors"
-            >
-              Date {renderSortIcon("date")}
-            </button>
-            <span>Method</span>
-            <button
-              onClick={() => handleSort("amount")}
-              className="flex items-center gap-1 hover:text-foreground transition-colors"
-            >
-              Amount {renderSortIcon("amount")}
-            </button>
-          </div>
-
-          <div className="divide-y divide-border">
-            {filtered.map((tx) => (
+            <div className="divide-y divide-border">
+              {filtered.slice(0, displayCount).map((tx) => (
               <div
                 key={tx.id}
                 className={cn(
-                  "group flex md:grid md:grid-cols-[auto_1fr_auto_auto_auto_auto] items-center gap-3 px-4 py-3",
-                  "hover:bg-accent/40 transition-colors",
-                  selectedIds.includes(tx.id) && "bg-accent/60"
+                  "group flex md:grid md:grid-cols-[auto_1fr_auto_auto_auto_auto] items-center gap-4 px-6 py-4",
+                  "hover:bg-card/70 transition-colors",
+                  selectedIds.includes(tx.id) && "bg-card/80",
                 )}
               >
-
                 <input
                   type="checkbox"
                   checked={selectedIds.includes(tx.id)}
@@ -309,18 +619,29 @@ export function TransactionsClient({
                   <div
                     className="p-2 rounded-lg shrink-0"
                     style={{
-                      background: tx.category?.color ? `${tx.category.color}20` : "var(--accent)",
-                      color: tx.category?.color ?? "var(--muted-foreground)",
+                      background: tx.category?.color
+                        ? `${tx.category.color}15`
+                        : "var(--accent)",
                     }}
                   >
-                    {tx.category?.icon
-                      ? <CategoryIcon name={tx.category.icon} size={18} />
-                      : <ArrowsLeftRight size={18} className="text-muted-foreground" />}
+                    {tx.category?.icon ? (
+                      <CategoryIcon
+                        name={tx.category.icon}
+                        size={18}
+                        className="text-foreground"
+                      />
+                    ) : (
+                      <ArrowsLeftRight size={18} className="text-foreground" />
+                    )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{tx.description}</p>
+                    <p className="text-sm font-medium truncate">
+                      {tx.description}
+                    </p>
                     {tx.note && (
-                      <p className="text-xs text-muted-foreground truncate">{tx.note}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {tx.note}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -347,7 +668,9 @@ export function TransactionsClient({
                   <span
                     className={cn(
                       "text-sm font-semibold whitespace-nowrap",
-                      tx.type === "INCOME" ? "text-emerald-500" : "text-red-500"
+                      tx.type === "INCOME"
+                        ? "text-emerald-500"
+                        : "text-red-500",
                     )}
                   >
                     {tx.type === "INCOME" ? "+" : "-"}
@@ -356,15 +679,18 @@ export function TransactionsClient({
 
                   <div className="flex items-center gap-1 max-w-0 overflow-hidden opacity-0 group-hover:max-w-16 group-hover:opacity-100 transition-all duration-200 ease-out pointer-events-none group-hover:pointer-events-auto">
                     <button
-                      onClick={() => { setEditingTx(tx); setModalOpen(true); }}
-                      className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => {
+                        setEditingTx(tx);
+                        setModalOpen(true);
+                      }}
+                      className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
                       aria-label="Edit"
                     >
                       <PencilSimple size={14} />
                     </button>
                     <button
                       onClick={() => setDeletingId(tx.id)}
-                      className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+                      className="p-1 rounded hover:bg-red-500/10 text-foreground hover:text-red-500 transition-colors"
                       aria-label="Delete"
                     >
                       <Trash size={14} />
@@ -375,12 +701,27 @@ export function TransactionsClient({
             ))}
           </div>
         </div>
+
+        {displayCount < filtered.length && (
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={handleLoadMore}
+            isLoading={isLoadingMore}
+          >
+            Load more ({filtered.length - displayCount} remaining)
+          </Button>
+        )}
+      </div>
       )}
 
       <TransactionModal
-        key={modalOpen ? (editingTx?.id || "new") : "closed"}
+        key={modalOpen ? editingTx?.id || "new" : "closed"}
         isOpen={modalOpen}
-        onClose={() => { setModalOpen(false); setEditingTx(null); }}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingTx(null);
+        }}
         categories={categories}
         currency={currency}
         initialData={

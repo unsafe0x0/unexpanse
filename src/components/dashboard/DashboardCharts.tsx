@@ -14,11 +14,15 @@ import {
   Legend,
 } from "recharts";
 import type { TooltipContentProps } from "recharts";
-import type { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent";
+import type {
+  ValueType,
+  NameType,
+} from "recharts/types/component/DefaultTooltipContent";
 import { CHART_COLORS } from "@/lib/constants";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { formatCurrency } from "@/lib/utils";
+import { memo } from "react";
 
 interface Category {
   id: string;
@@ -55,7 +59,13 @@ function CustomTooltip({
     return (
       <div className="rounded-lg border border-border bg-card p-3 shadow-lg text-sm text-card-foreground">
         <p className="font-medium mb-2">{label}</p>
-        {(payload as unknown as Array<{ name: string; value: number; color: string }>).map((entry) => (
+        {(
+          payload as unknown as Array<{
+            name: string;
+            value: number;
+            color: string;
+          }>
+        ).map((entry) => (
           <div key={entry.name} className="flex items-center gap-2">
             <div
               className="h-2 w-2 rounded-full shrink-0"
@@ -75,10 +85,19 @@ function CustomTooltip({
   return null;
 }
 
-export function DashboardCharts({ userId, categories, currency }: DashboardChartsProps) {
+function DashboardChartsComponent({
+  userId,
+  categories,
+  currency,
+}: DashboardChartsProps) {
   const [spendingData, setSpendingData] = useState<SpendingData[]>([]);
   const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const categoryIds = useMemo(
+    () => categories.map((c) => c.id).join(","),
+    [categories],
+  );
 
   useEffect(() => {
     function generatePlaceholderData() {
@@ -88,14 +107,14 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
           month,
           income: 2000 + i * 100,
           expense: 1500 + i * 50,
-        }))
+        })),
       );
       setCategoryData(
         categories.slice(0, 5).map((cat, i) => ({
           name: cat.name,
           value: 200 + i * 50,
           color: cat.color || CHART_COLORS[i % CHART_COLORS.length],
-        }))
+        })),
       );
     }
 
@@ -117,11 +136,13 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
     }
 
     fetchChartData();
-  }, [userId, categories.length]);
+  }, [userId, categoryIds]);
 
   const renderTooltip = useCallback(
-    (props: TooltipContentProps<ValueType, NameType>) => <CustomTooltip {...props} currency={currency} />,
-    [currency]
+    (props: TooltipContentProps<ValueType, NameType>) => (
+      <CustomTooltip {...props} currency={currency} />
+    ),
+    [currency],
   );
 
   if (isLoading) {
@@ -141,35 +162,62 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
       <div className="rounded-xl bg-card p-5">
-        <p className="text-base font-semibold tracking-tight mb-4">Spending Trend</p>
+        <p className="text-base font-semibold tracking-tight mb-4">
+          Spending Trend
+        </p>
         <ResponsiveContainer width="100%" height={280}>
-            <BarChart
-              data={[...spendingData].sort((a, b) => {
-                const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                return months.indexOf(a.month) - months.indexOf(b.month);
-              })}
-              margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis
-                dataKey="month"
-                tick={{ fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v) => {
-                  const symbol = new Intl.NumberFormat("en-US", { style: "currency", currency }).formatToParts(0).find(p => p.type === 'currency')?.value || '$';
-                  return `${symbol}${(v / 1000).toFixed(0)}k`;
-                }}
-              />
-              <Tooltip content={renderTooltip} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
-              <Legend iconType="circle" iconSize={8} wrapperStyle={{ paddingTop: 20, fontSize: 12 }} />
+          <BarChart
+            data={[...spendingData].sort((a, b) => {
+              const months = [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+              ];
+              return months.indexOf(a.month) - months.indexOf(b.month);
+            })}
+            margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis
+              dataKey="month"
+              tick={{ fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              tick={{ fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={(v) => {
+                const symbol =
+                  new Intl.NumberFormat("en-US", {
+                    style: "currency",
+                    currency,
+                  })
+                    .formatToParts(0)
+                    .find((p) => p.type === "currency")?.value || "$";
+                return `${symbol}${(v / 1000).toFixed(0)}k`;
+              }}
+            />
+            <Tooltip
+              content={renderTooltip}
+              cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
+            />
+            <Legend
+              iconType="circle"
+              iconSize={8}
+              wrapperStyle={{ paddingTop: 20, fontSize: 12 }}
+            />
             <Bar
               dataKey="income"
               name="Income"
@@ -187,7 +235,9 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
       </div>
 
       <div className="rounded-xl bg-card p-5">
-        <p className="text-base font-semibold tracking-tight mb-4">Category Breakdown</p>
+        <p className="text-base font-semibold tracking-tight mb-4">
+          Category Breakdown
+        </p>
         {categoryData.length === 0 ? (
           <div className="flex items-center justify-center h-55 text-sm text-muted-foreground">
             No expense data yet
@@ -234,3 +284,4 @@ export function DashboardCharts({ userId, categories, currency }: DashboardChart
   );
 }
 
+export const DashboardCharts = memo(DashboardChartsComponent);

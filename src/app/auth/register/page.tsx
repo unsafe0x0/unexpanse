@@ -22,7 +22,8 @@ export default function RegisterPage() {
     const newErrors: Record<string, string> = {};
     if (!form.name) newErrors.name = "Name is required";
     if (!form.email) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = "Invalid email";
+    else if (!/\S+@\S+\.\S+/.test(form.email))
+      newErrors.email = "Invalid email";
     if (!form.password) newErrors.password = "Password is required";
     else if (form.password.length < 8) newErrors.password = "Min 8 characters";
     setErrors(newErrors);
@@ -49,7 +50,10 @@ export default function RegisterPage() {
         redirect: false,
       });
 
-      toast.success("Account created!", "Welcome to unexpanse. Setting up your dashboard...");
+      toast.success(
+        "Account created!",
+        "Welcome to unexpanse. Setting up your dashboard...",
+      );
       window.location.href = "/dashboard";
     } catch {
       toast.error("Something went wrong", "Please try again later.");

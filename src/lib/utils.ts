@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export function formatCurrency(
   amount: number,
   currency: string = "INR",
-  locale: string = "en-US"
+  locale: string = "en-US",
 ): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",
@@ -43,7 +43,9 @@ export function formatRelativeDate(date: Date | string): string {
 }
 
 export function getMonthName(month: number): string {
-  return new Date(2000, month - 1, 1).toLocaleString("en-US", { month: "long" });
+  return new Date(2000, month - 1, 1).toLocaleString("en-US", {
+    month: "long",
+  });
 }
 
 export function getCurrentMonth(): { month: number; year: number } {

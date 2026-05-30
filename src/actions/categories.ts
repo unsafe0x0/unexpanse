@@ -1,24 +1,20 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
-
-const CategorySchema = z.object({
-  name: z.string().min(1, "Name is required").max(50),
-  icon: z.string().min(1, "Icon is required"),
-  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Invalid color format"),
-});
+import {
+  createCategoryForUser,
+  deleteCategoryForUser,
+  getCategoriesForUser,
+  updateCategoryForUser,
+} from "@/services/categories";
+import { categorySchema } from "@/validators/category";
 
 export async function getCategories() {
   const session = await auth();
   if (!session?.user?.id) return [];
 
-  return prisma.category.findMany({
-    where: { userId: session.user.id },
-    orderBy: { name: "asc" },
-  });
+  return getCategoriesForUser(session.user.id);
 }
 
 export async function createCategory(data: {
@@ -29,34 +25,30 @@ export async function createCategory(data: {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
 
-  const parsed = CategorySchema.safeParse(data);
+  const parsed = categorySchema.safeParse(data);
   if (!parsed.success) return { error: "Invalid input data" };
+  await createCategoryForUser(session.user.id, parsed.data);
 
-  await prisma.category.create({
-    data: { ...parsed.data, userId: session.user.id },
-  });
-
-  revalidatePath("/dashboard/categories");
+  revalidatePath("/dashboard");
   return { success: true };
 }
 
-export async function updateCategory(id: string, data: {
-  name: string;
-  icon: string;
-  color: string;
-}) {
+export async function updateCategory(
+  id: string,
+  data: {
+    name: string;
+    icon: string;
+    color: string;
+  },
+) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
 
-  const parsed = CategorySchema.safeParse(data);
+  const parsed = categorySchema.safeParse(data);
   if (!parsed.success) return { error: "Invalid input data" };
+  await updateCategoryForUser(session.user.id, id, parsed.data);
 
-  await prisma.category.updateMany({
-    where: { id, userId: session.user.id },
-    data: parsed.data,
-  });
-
-  revalidatePath("/dashboard/categories");
+  revalidatePath("/dashboard");
   return { success: true };
 }
 
@@ -64,16 +56,8 @@ export async function deleteCategory(id: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
 
-  // Unlink transactions first
-  await prisma.transaction.updateMany({
-    where: { categoryId: id, userId: session.user.id },
-    data: { categoryId: null },
-  });
+  await deleteCategoryForUser(session.user.id, id);
 
-  await prisma.category.deleteMany({
-    where: { id, userId: session.user.id },
-  });
-
-  revalidatePath("/dashboard/categories");
+  revalidatePath("/dashboard");
   return { success: true };
 }

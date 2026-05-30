@@ -6,16 +6,39 @@ import { Input } from "@/components/ui/Input";
 import { Modal, ConfirmDialog } from "@/components/ui/Modal";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useToast } from "@/components/ui/Toast";
-import { CategoryIcon, CATEGORY_ICON_OPTIONS } from "@/components/ui/CategoryIcon";
-import { createCategory, updateCategory, deleteCategory } from "@/actions/categories";
+import {
+  CategoryIcon,
+  CATEGORY_ICON_OPTIONS,
+} from "@/components/ui/CategoryIcon";
+import {
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "@/actions/categories";
 import { useRouter } from "next/navigation";
 import { Plus, PencilSimple, Trash, Tag } from "@phosphor-icons/react";
 
 const COLOR_OPTIONS = [
-  "#F97316", "#3B82F6", "#EC4899", "#8B5CF6", "#10B981",
-  "#6366F1", "#F59E0B", "#14B8A6", "#64748B", "#EF4444",
-  "#D946EF", "#84CC16", "#0EA5E9", "#22C55E", "#A855F7",
-  "#06B6D4", "#F43F5E", "#FB7185", "#78716C", "#94A3B8",
+  "#F97316",
+  "#3B82F6",
+  "#EC4899",
+  "#8B5CF6",
+  "#10B981",
+  "#6366F1",
+  "#F59E0B",
+  "#14B8A6",
+  "#64748B",
+  "#EF4444",
+  "#D946EF",
+  "#84CC16",
+  "#0EA5E9",
+  "#22C55E",
+  "#A855F7",
+  "#06B6D4",
+  "#F43F5E",
+  "#FB7185",
+  "#78716C",
+  "#94A3B8",
 ];
 
 interface Category {
@@ -36,7 +59,9 @@ interface CategoryForm {
   color: string;
 }
 
-export function CategoriesClient({ categories: initial }: CategoriesClientProps) {
+export function CategoriesClient({
+  categories: initial,
+}: CategoriesClientProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [categories, setCategories] = useState(initial);
@@ -44,7 +69,11 @@ export function CategoriesClient({ categories: initial }: CategoriesClientProps)
   const [editingCat, setEditingCat] = useState<Category | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [form, setForm] = useState<CategoryForm>({ name: "", icon: "tag", color: "#6366F1" });
+  const [form, setForm] = useState<CategoryForm>({
+    name: "",
+    icon: "tag",
+    color: "#6366F1",
+  });
   const [error, setError] = useState("");
 
   const openCreate = () => {
@@ -63,19 +92,25 @@ export function CategoriesClient({ categories: initial }: CategoriesClientProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim()) { setError("Name is required"); return; }
+    if (!form.name.trim()) {
+      setError("Name is required");
+      return;
+    }
 
     setIsLoading(true);
     try {
       if (editingCat) {
         await updateCategory(editingCat.id, form);
         setCategories((prev) =>
-          prev.map((c) => (c.id === editingCat.id ? { ...c, ...form } : c))
+          prev.map((c) => (c.id === editingCat.id ? { ...c, ...form } : c)),
         );
         toast.success("Category updated");
       } else {
         const result = await createCategory(form);
-        if (result.error) { toast.error("Error", result.error); return; }
+        if (result.error) {
+          toast.error("Error", result.error);
+          return;
+        }
         toast.success("Category created");
         setForm({ name: "", icon: "tag", color: "#6366F1" });
         router.refresh();
@@ -106,7 +141,11 @@ export function CategoriesClient({ categories: initial }: CategoriesClientProps)
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <Button onClick={openCreate} leftIcon={<Plus size={16} weight="bold" />} id="create-category-btn">
+        <Button
+          onClick={openCreate}
+          leftIcon={<Plus size={16} weight="bold" />}
+          id="create-category-btn"
+        >
           New category
         </Button>
       </div>
@@ -114,10 +153,14 @@ export function CategoriesClient({ categories: initial }: CategoriesClientProps)
       {categories.length === 0 ? (
         <div className="rounded-xl border border-border">
           <EmptyState
-            icon={<Tag size={32} className="text-muted-foreground" />}
+            icon={<Tag size={32} className="text-foreground" />}
             title="No categories yet"
             description="Create categories to organize your transactions."
-            action={{ label: "Create category", onClick: openCreate, leftIcon: <Plus size={16} weight="bold" /> }}
+            action={{
+              label: "Create category",
+              onClick: openCreate,
+              leftIcon: <Plus size={16} weight="bold" />,
+            }}
           />
         </div>
       ) : (
@@ -142,14 +185,14 @@ export function CategoriesClient({ categories: initial }: CategoriesClientProps)
               <div className="hidden group-hover:flex items-center gap-1 shrink-0">
                 <button
                   onClick={() => openEdit(cat)}
-                  className="p-1.5 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                  className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
                   aria-label={`Edit ${cat.name}`}
                 >
                   <PencilSimple size={14} />
                 </button>
                 <button
                   onClick={() => setDeletingId(cat.id)}
-                  className="p-1.5 rounded-md hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
+                  className="p-1.5 rounded-md hover:bg-red-500/10 text-foreground hover:text-red-500 transition-colors"
                   aria-label={`Delete ${cat.name}`}
                 >
                   <Trash size={14} />
@@ -172,7 +215,10 @@ export function CategoriesClient({ categories: initial }: CategoriesClientProps)
             label="Name"
             placeholder="e.g. Groceries"
             value={form.name}
-            onChange={(e) => { setForm((f) => ({ ...f, name: e.target.value })); setError(""); }}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, name: e.target.value }));
+              setError("");
+            }}
             error={error}
           />
 
@@ -188,7 +234,7 @@ export function CategoriesClient({ categories: initial }: CategoriesClientProps)
                   className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all ${
                     form.icon === iconName
                       ? "bg-foreground text-background"
-                      : "hover:bg-accent text-muted-foreground hover:text-foreground"
+                      : "hover:bg-secondary text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <CategoryIcon name={iconName} size={18} />
@@ -206,7 +252,9 @@ export function CategoriesClient({ categories: initial }: CategoriesClientProps)
                   type="button"
                   onClick={() => setForm((f) => ({ ...f, color }))}
                   className={`h-6 w-6 rounded-full transition-transform ${
-                    form.color === color ? "scale-125 ring-2 ring-offset-2 ring-foreground" : "hover:scale-110"
+                    form.color === color
+                      ? "scale-125 ring-2 ring-offset-2 ring-foreground"
+                      : "hover:scale-110"
                   }`}
                   style={{ background: color }}
                   aria-label={color}
@@ -222,11 +270,18 @@ export function CategoriesClient({ categories: initial }: CategoriesClientProps)
             >
               <CategoryIcon name={form.icon} size={18} />
             </div>
-            <span className="text-sm font-medium">{form.name || "Preview"}</span>
+            <span className="text-sm font-medium">
+              {form.name || "Preview"}
+            </span>
           </div>
 
           <div className="flex gap-2">
-            <Button type="button" variant="outline" className="flex-1" onClick={() => setModalOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => setModalOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" className="flex-1" isLoading={isLoading}>

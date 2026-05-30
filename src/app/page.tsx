@@ -1,7 +1,8 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, ChartBar, Target, Wallet } from "@/components/ui/Icons";
+import { Button } from "@/components/ui/Button";
+import { ChartBar, Target, Wallet, ArrowRight } from "@/components/ui/Icons";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,108 +15,152 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="flex items-center justify-between h-16 px-6 max-w-6xl mx-auto">
-        <div className="flex items-center gap-2.5">
-          <span className="font-bold text-lg">unexpanse</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/auth/login"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Sign in
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="font-bold text-lg">
+            unexpanse
           </Link>
-          <Link
-            href="/auth/register"
-            className="flex items-center gap-1.5 rounded-lg bg-foreground text-background px-4 py-2 text-sm font-medium hover:bg-foreground/90 transition-colors"
-          >
-            Get started
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/auth/login"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/auth/register"
+              className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              Get started
+            </Link>
+          </div>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground mb-8">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Now with AI-powered insights
+      {/* Hero Section */}
+      <section className="max-w-5xl mx-auto px-6 py-24 text-center">
+        <div className="mb-8 inline-block">
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-secondary text-foreground border border-border">
+            Track smarter, spend wisely
+          </span>
         </div>
-        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-tight mb-6">
-          Your finances,{" "}
-          <span className="bg-linear-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">beautifully tracked.</span>
+
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
+          Smart expense tracking
         </h1>
-        <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed">
-          unexpanse is the premium personal finance tracker that helps you understand
-          your spending, set smart budgets, and build lasting financial habits.
+
+        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed">
+          Understand your spending patterns. Set budgets that work. Build
+          lasting financial habits.
+          <br /> All in one beautiful, minimal interface.
         </p>
-        <div className="flex items-center justify-center gap-3">
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/auth/register"
-            className="flex items-center gap-2 rounded-xl bg-foreground text-background px-6 py-3 text-sm font-semibold hover:bg-foreground/90 transition-all hover:-translate-y-0.5 shadow-lg"
+            className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-6 py-3 text-sm font-medium hover:bg-primary/90 transition-colors"
           >
-            Start for free
-            <ArrowRight size={16} />
+            Start tracking free
+            <ArrowRight size={16} className="ml-2" />
           </Link>
           <Link
             href="/auth/login"
-            className="rounded-xl border border-border px-6 py-3 text-sm font-medium hover:bg-accent transition-all"
+            className="inline-flex items-center justify-center rounded-lg border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition-colors"
           >
             Sign in
           </Link>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-5xl mx-auto px-6 pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {/* Features Section */}
+      <section className="max-w-6xl mx-auto px-6 py-24 border-t border-border">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              icon: <ChartBar size={20} weight="duotone" />,
-              title: "Smart Analytics",
-              desc: "Beautiful charts showing your spending patterns, trends, and category breakdowns.",
+              icon: <ChartBar size={24} weight="duotone" />,
+              title: "Beautiful Analytics",
+              description:
+                "See your spending patterns at a glance with clean, intuitive charts and insights.",
             },
             {
-              icon: <Target size={20} weight="duotone" />,
-              title: "Budget Goals",
-              desc: "Set monthly budgets by category and get alerted before you overspend.",
+              icon: <Target size={24} weight="duotone" />,
+              title: "Smart Budgets",
+              description:
+                "Set budgets by category and stay on track with intelligent alerts and tracking.",
             },
             {
-              icon: <Wallet size={20} weight="duotone" />,
+              icon: <Wallet size={24} weight="duotone" />,
               title: "Full Control",
-              desc: "Track income, expenses, filter by tags, export data, and manage categories.",
+              description:
+                "Export data, manage categories, track income & expenses, organize with tags.",
             },
-          ].map((feature) => (
-            <div
-              key={feature.title}
-              className="rounded-2xl border border-border bg-card p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background mb-4">
+          ].map((feature, idx) => (
+            <div key={idx} className="group">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4 group-hover:scale-110 transition-transform duration-200">
                 {feature.icon}
               </div>
-              <h3 className="font-semibold mb-2">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+              <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {feature.description}
+              </p>
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className="border-t border-border">
-        <div className="max-w-4xl mx-auto px-6 py-16 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to take control?</h2>
-          <p className="text-muted-foreground mb-8">
-            Join thousands of users who track their finances with unexpanse.
-          </p>
-          <Link
-            href="/auth/register"
-            className="inline-flex items-center gap-2 rounded-xl bg-foreground text-background px-8 py-3.5 font-semibold hover:bg-foreground/90 transition-all hover:-translate-y-0.5"
-          >
-            Create free account
-            <ArrowRight size={16} />
-          </Link>
+      {/* CTA Section */}
+      <section className="max-w-4xl mx-auto px-6 py-24 text-center border-t border-border">
+        <h2 className="text-4xl font-bold mb-4">
+          Ready to transform your finances?
+        </h2>
+        <p className="text-lg text-muted-foreground mb-8">
+          Join thousands tracking their spending smarter with unexpanse.
+        </p>
+        <Link
+          href="/auth/register"
+          className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-8 py-3 text-base font-medium hover:bg-primary/90 transition-colors"
+        >
+          Start free now
+          <ArrowRight size={18} className="ml-2" />
+        </Link>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h3 className="font-bold mb-1">unexpanse</h3>
+              <p className="text-sm text-muted-foreground">
+                Smart expense tracking
+              </p>
+            </div>
+            <div className="flex gap-4">
+              <a
+                href="#"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Docs
+              </a>
+              <a
+                href="#"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                GitHub
+              </a>
+              <a
+                href="#"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Twitter
+              </a>
+            </div>
+          </div>
+          <div className="pt-8 border-t border-border text-xs text-muted-foreground text-center">
+            <p>&copy; 2026 unexpanse</p>
+          </div>
         </div>
-      </div>
-
-      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © unexpanse. Built for financial clarity.
       </footer>
     </div>
   );

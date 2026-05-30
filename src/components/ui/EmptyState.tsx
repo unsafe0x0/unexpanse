@@ -18,9 +18,24 @@ interface EmptyStateProps {
 }
 
 const sizeClasses = {
-  sm: { wrapper: "py-8", icon: "h-8 w-8", title: "text-sm", desc: "text-xs" },
-  default: { wrapper: "py-12", icon: "h-10 w-10", title: "text-base", desc: "text-sm" },
-  lg: { wrapper: "py-16", icon: "h-12 w-12", title: "text-lg", desc: "text-sm" },
+  sm: {
+    wrapper: "py-10 px-4",
+    icon: "h-8 w-8",
+    title: "text-sm",
+    desc: "text-xs",
+  },
+  default: {
+    wrapper: "py-16 px-4",
+    icon: "h-10 w-10",
+    title: "text-base",
+    desc: "text-sm",
+  },
+  lg: {
+    wrapper: "py-20 px-4",
+    icon: "h-12 w-12",
+    title: "text-lg",
+    desc: "text-sm",
+  },
 };
 
 export function EmptyState({
@@ -38,23 +53,21 @@ export function EmptyState({
       className={cn(
         "flex flex-col items-center justify-center text-center animate-fade-in",
         classes.wrapper,
-        className
+        className,
       )}
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent mb-4">
-        {icon ?? <SealQuestion size={32} className="text-muted-foreground" />}
+      <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-accent mb-6">
+        {icon ?? <SealQuestion size={32} className="text-foreground" />}
       </div>
       <h3 className={cn("font-semibold", classes.title)}>{title}</h3>
       {description && (
-        <p
-          className={cn("text-muted-foreground mt-1.5 max-w-xs", classes.desc)}
-        >
+        <p className={cn("text-muted-foreground mt-2 max-w-xs", classes.desc)}>
           {description}
         </p>
       )}
       {action && (
         <Button
-          className="mt-4"
+          className="mt-6"
           onClick={action.onClick}
           leftIcon={action.leftIcon}
         >

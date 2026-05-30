@@ -14,26 +14,27 @@ import {
 } from "@phosphor-icons/react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const navItems: { section: string, items: { tab: DashboardTab, label: string, icon: any }[] }[] = [
+const navItems: {
+  section: string;
+  items: { tab: DashboardTab; label: string; icon: any }[];
+}[] = [
   {
     section: "Overview",
-    items: [
-      { tab: "dashboard", label: "Dashboard", icon: SquaresFour },
-    ],
+    items: [{ tab: "dashboard", label: "Dashboard", icon: SquaresFour }],
   },
   {
     section: "Money",
     items: [
       { tab: "transactions", label: "Transactions", icon: ArrowsLeftRight },
-      { tab: "categories",   label: "Categories",   icon: Tag },
-      { tab: "budgets",      label: "Budgets",      icon: Target },
+      { tab: "categories", label: "Categories", icon: Tag },
+      { tab: "budgets", label: "Budgets", icon: Target },
     ],
   },
   {
     section: "Insights",
     items: [
       { tab: "analytics", label: "Analytics", icon: ChartBar },
-      { tab: "settings",  label: "Settings",  icon: Gear },
+      { tab: "settings", label: "Settings", icon: Gear },
     ],
   },
 ];
@@ -52,7 +53,6 @@ export function Sidebar() {
 
   return (
     <>
-
       {isOpen && (
         <div
           className="fixed inset-0 z-20 bg-black/40 backdrop-blur-sm lg:hidden"
@@ -67,22 +67,24 @@ export function Sidebar() {
           "transition-all duration-300 ease-in-out",
           isOpen ? "translate-x-0" : "-translate-x-full",
           "lg:relative lg:translate-x-0 lg:z-auto",
-          isOpen ? "lg:w-17" : "lg:w-65"
+          isOpen ? "lg:w-17" : "lg:w-65",
         )}
       >
         <div className="flex h-16 items-center gap-3 px-4 border-b border-border shrink-0">
-          <span className={cn(
-            "text-base font-bold tracking-tight animate-fade-in",
-            isOpen ? "lg:hidden" : "block"
-          )}>
+          <span
+            className={cn(
+              "text-base font-bold tracking-tight animate-fade-in",
+              isOpen ? "lg:hidden" : "block",
+            )}
+          >
             unexpanse
           </span>
           <button
             onClick={toggle}
             className={cn(
-              "ml-auto p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent",
+              "ml-auto p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary",
               "transition-all duration-200 hidden lg:block",
-              isOpen ? "rotate-180" : "rotate-0"
+              isOpen ? "rotate-180" : "rotate-0",
             )}
             aria-label={isOpen ? "Expand sidebar" : "Collapse sidebar"}
           >
@@ -90,45 +92,56 @@ export function Sidebar() {
           </button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4 px-2">
+        <nav className="flex-1 overflow-y-auto py-6 px-3">
           {navItems.map((section) => (
-            <div key={section.section} className="mb-6">
-              <p className={cn(
-                "px-2 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60",
-                isOpen ? "lg:hidden" : "block"
-              )}>
+            <div key={section.section} className="mb-8">
+              <p
+                className={cn(
+                  "px-3 mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground",
+                  isOpen ? "lg:hidden" : "block",
+                )}
+              >
                 {section.section}
               </p>
-              <div className="space-y-px">
+              <div className="space-y-1">
                 {section.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.tab;
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.tab;
 
-                return (
-                  <button
-                    key={item.tab}
-                    onClick={() => setActiveTab(item.tab)}
-                    className={cn(
-                      "flex items-center justify-start gap-3 w-full rounded-lg py-2 text-sm font-medium",
-                      "transition-all duration-150 group",
-                      isActive
-                        ? "bg-foreground text-background"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent",
-                      isOpen ? "lg:justify-center lg:px-2 px-3" : "px-3"
-                    )}
-                    title={isOpen ? item.label : undefined}
-                  >
-                    <Icon size={18} weight={isActive ? "fill" : "regular"} className="shrink-0" />
-                    <span className={cn("animate-fade-in", isOpen ? "lg:hidden" : "block")}>
-                      {item.label}
-                    </span>
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={item.tab}
+                      onClick={() => setActiveTab(item.tab)}
+                      className={cn(
+                        "flex items-center justify-start gap-3 w-full rounded-lg py-2.5 text-sm font-medium",
+                        "transition-all duration-150 group",
+                        isActive
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary",
+                        isOpen ? "lg:justify-center lg:px-3 px-3" : "px-3",
+                      )}
+                      title={isOpen ? item.label : undefined}
+                    >
+                      <Icon
+                        size={18}
+                        weight={isActive ? "fill" : "regular"}
+                        className="shrink-0 text-current"
+                      />
+                      <span
+                        className={cn(
+                          "animate-fade-in",
+                          isOpen ? "lg:hidden" : "block",
+                        )}
+                      >
+                        {item.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
-      </nav>
+          ))}
+        </nav>
       </aside>
     </>
   );

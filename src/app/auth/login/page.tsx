@@ -38,7 +38,10 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        toast.error("Invalid credentials", "Please check your email and password.");
+        toast.error(
+          "Invalid credentials",
+          "Please check your email and password.",
+        );
         setErrors({ password: "Invalid email or password" });
       } else {
         toast.success("Welcome back!", "Redirecting to your dashboard...");
@@ -91,11 +94,7 @@ export default function LoginPage() {
               className="hover:text-foreground transition-colors"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? (
-                <EyeSlash size={16} />
-              ) : (
-                <Eye size={16} />
-              )}
+              {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
             </button>
           }
           disabled={isLoading}

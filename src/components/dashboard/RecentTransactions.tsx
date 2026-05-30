@@ -31,9 +31,9 @@ export function RecentTransactions({
 
   if (transactions.length === 0) {
     return (
-      <div className="rounded-xl border border-border">
+      <div className="rounded-lg border border-border">
         <EmptyState
-          icon={<ArrowsLeftRight size={32} className="text-muted-foreground" />}
+          icon={<ArrowsLeftRight size={32} className="text-foreground" />}
           title="No transactions yet"
           description="Add your first transaction to get started tracking your finances."
           size="sm"
@@ -43,29 +43,31 @@ export function RecentTransactions({
   }
 
   return (
-    <div className="rounded-xl border border-border overflow-hidden">
+    <div className="rounded-lg border border-border overflow-hidden">
       <div className="divide-y divide-border">
         {transactions.map((tx) => (
           <div
             key={tx.id}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors"
+            className="flex items-center gap-4 px-6 py-4 hover:bg-card/70 transition-colors"
           >
-
             <div
-              className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0"
+              className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0 text-foreground"
               style={{
-                background: tx.category?.color ? `${tx.category.color}20` : "var(--accent)",
-                color: tx.category?.color ?? "var(--muted-foreground)",
+                background: tx.category?.color
+                  ? `${tx.category.color}15`
+                  : "var(--accent)",
               }}
             >
-              {tx.category?.icon
-                ? <CategoryIcon name={tx.category.icon} size={18} />
-                : <ArrowsLeftRight size={18} className="text-muted-foreground" />}
+              {tx.category?.icon ? (
+                <CategoryIcon name={tx.category.icon} size={18} />
+              ) : (
+                <ArrowsLeftRight size={18} />
+              )}
             </div>
 
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{tx.description}</p>
-              <div className="flex items-center gap-2 mt-0.5">
+              <div className="flex items-center gap-2 mt-1">
                 {tx.category && (
                   <Badge variant="secondary" size="sm">
                     {tx.category.name}
@@ -80,7 +82,9 @@ export function RecentTransactions({
             <span
               className={cn(
                 "text-sm font-semibold shrink-0",
-                tx.type === "INCOME" ? "text-emerald-500" : "text-red-500"
+                tx.type === "INCOME"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-red-600 dark:text-red-400",
               )}
             >
               {tx.type === "INCOME" ? "+" : "-"}
@@ -90,7 +94,7 @@ export function RecentTransactions({
         ))}
       </div>
 
-      <div className="px-4 py-3 border-t border-border bg-muted/20 flex justify-center">
+      <div className="px-6 py-4 border-t border-border bg-muted/20 flex justify-center">
         <Button
           variant="ghost"
           size="sm"

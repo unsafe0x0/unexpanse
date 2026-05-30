@@ -10,7 +10,7 @@ export function Skeleton({ className, ...props }: SkeletonProps) {
       className={cn(
         "rounded-md animate-shimmer bg-[length:200%_100%]",
         "[background:linear-gradient(90deg,var(--muted)_25%,color-mix(in_srgb,var(--muted-foreground)_10%,transparent)_50%,var(--muted)_75%)]",
-        className
+        className,
       )}
       {...props}
     />

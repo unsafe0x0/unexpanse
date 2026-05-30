@@ -38,14 +38,17 @@ export function Progress({
       ? percentage >= 90
         ? "danger"
         : percentage >= 75
-        ? "warning"
-        : "default"
+          ? "warning"
+          : "default"
       : variant;
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <div
-        className={cn("flex-1 rounded-full bg-muted overflow-hidden", sizeClasses[size])}
+        className={cn(
+          "flex-1 rounded-full bg-muted overflow-hidden",
+          sizeClasses[size],
+        )}
         role="progressbar"
         aria-valuenow={value}
         aria-valuemax={max}
@@ -55,7 +58,7 @@ export function Progress({
           className={cn(
             "h-full rounded-full transition-all duration-500 ease-out",
             variantClasses[autoVariant],
-            barClassName
+            barClassName,
           )}
           style={{ width: `${percentage}%` }}
         />

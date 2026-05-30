@@ -25,18 +25,18 @@ function getQueryClient() {
   }
 }
 
-export const AppProviders: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AppProviders: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const queryClient = getQueryClient();
 
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <SidebarProvider>
-          <TabProvider>
-            {children}
-          </TabProvider>
+          <TabProvider>{children}</TabProvider>
         </SidebarProvider>
       </ToastProvider>
     </QueryClientProvider>
   );
-}
+};

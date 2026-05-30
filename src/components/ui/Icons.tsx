@@ -13,4 +13,14 @@ import {
   ArrowsHorizontal,
 } from "@phosphor-icons/react";
 
-export { Lightning, ArrowRight, ChartBar, Target, Wallet, TrendUp, TrendDown, PiggyBank, ArrowsHorizontal };
+export {
+  Lightning,
+  ArrowRight,
+  ChartBar,
+  Target,
+  Wallet,
+  TrendUp,
+  TrendDown,
+  PiggyBank,
+  ArrowsHorizontal,
+};

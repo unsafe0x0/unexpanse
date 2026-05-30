@@ -27,12 +27,6 @@ model User {
   budgets      Budget[]
 }
 
-
-
-
-
-
-
 enum TransactionType {
   INCOME
   EXPENSE
