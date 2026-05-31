@@ -80,18 +80,12 @@ interface DashboardClientProps {
   session: Session | null;
   stats: DashboardStats | null;
   categories: Category[];
-  transactions: Transaction[];
-  analyticsTransactions: Transaction[];
-  budgets: Budget[];
 }
 
 export function DashboardClient({
   session,
   stats,
   categories,
-  transactions,
-  analyticsTransactions,
-  budgets,
 }: DashboardClientProps) {
   const { activeTab } = useTabStore();
 
@@ -183,7 +177,6 @@ export function DashboardClient({
             </p>
           </div>
           <TransactionsClient
-            initialTransactions={transactions}
             categories={categories}
             currency={currency}
           />
@@ -211,9 +204,7 @@ export function DashboardClient({
             </p>
           </div>
           <BudgetsClient
-            budgets={budgets}
             categories={categories}
-            spending={{}}
             currency={currency}
           />
         </>
@@ -228,7 +219,6 @@ export function DashboardClient({
             </p>
           </div>
           <AnalyticsClient
-            transactions={analyticsTransactions}
             categories={categories}
             currency={currency}
           />

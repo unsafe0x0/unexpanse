@@ -1,12 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { getCacheKey, withCache } from "@/lib/cache";
+import { cache } from "react";
 
-export async function getBudgetsForUser(userId: string) {
-  const key = getCacheKey("budgets", userId);
-  return withCache(key, () => getBudgetsForUserImpl(userId));
-}
-
-async function getBudgetsForUserImpl(userId: string) {
+export const getBudgetsForUser = cache(async (userId: string) => {
   const now = new Date();
   return prisma.budget.findMany({
     where: {
@@ -19,7 +14,7 @@ async function getBudgetsForUserImpl(userId: string) {
     include: { category: true },
     orderBy: { createdAt: "asc" },
   });
-}
+});
 
 export async function createBudgetForUser(
   userId: string,

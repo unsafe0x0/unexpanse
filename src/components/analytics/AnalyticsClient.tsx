@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getAnalyticsTransactions } from "@/actions/transactions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
@@ -44,7 +46,6 @@ interface Category {
 }
 
 interface AnalyticsClientProps {
-  transactions: Transaction[];
   categories: Category[];
   currency?: string;
 }
@@ -84,9 +85,14 @@ function CustomTooltip({
 }
 
 export function AnalyticsClient({
-  transactions,
+  categories,
   currency = "INR",
 }: AnalyticsClientProps) {
+  const { data: transactions = [], isLoading } = useQuery({
+    queryKey: ["analyticsTransactions"],
+    queryFn: () => getAnalyticsTransactions(),
+  });
+
   const monthlyData = useMemo(() => {
     const map: Record<
       string,
@@ -182,7 +188,11 @@ export function AnalyticsClient({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64 text-muted-foreground">Loading analytics...</div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           {
             label: "Total Income",
@@ -415,6 +425,8 @@ export function AnalyticsClient({
           </ResponsiveContainer>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }

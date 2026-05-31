@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { TransactionInput } from "@/validators/transaction";
-import { getCacheKey, withCache } from "@/lib/cache";
+import { cache } from "react";
 
 export interface TransactionQueryParams {
   type?: "INCOME" | "EXPENSE";
@@ -104,12 +104,7 @@ export async function getTransactionsForUser(
   return { transactions, total };
 }
 
-export async function getDashboardStatsForUser(userId: string) {
-  const key = getCacheKey("dashboardStats", userId);
-  return withCache(key, () => getDashboardStatsForUserImpl(userId));
-}
-
-async function getDashboardStatsForUserImpl(userId: string) {
+export const getDashboardStatsForUser = cache(async (userId: string) => {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -183,4 +178,4 @@ async function getDashboardStatsForUserImpl(userId: string) {
     recentTransactions: recentTx,
     currency: userDb?.currency || "INR",
   };
-}
+});

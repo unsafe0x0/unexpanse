@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -11,6 +11,7 @@ import { TransactionModal } from "./TransactionModal";
 import { useToast } from "@/components/ui/Toast";
 import { deleteTransaction, deleteTransactions, getTransactions } from "@/actions/transactions";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import Papa from "papaparse";
 import jsPDF from "jspdf";
@@ -54,7 +55,6 @@ interface Category {
 }
 
 interface TransactionsClientProps {
-  initialTransactions: Transaction[];
   categories: Category[];
   currency: string;
 }
@@ -63,7 +63,6 @@ type SortField = "date" | "amount" | "description";
 type SortOrder = "asc" | "desc";
 
 export function TransactionsClient({
-  initialTransactions,
   categories,
   currency,
 }: TransactionsClientProps) {
@@ -80,7 +79,23 @@ export function TransactionsClient({
   const selectAll = (ids: string[]) => setSelectedIds(ids);
   const clearSelection = () => setSelectedIds([]);
 
-  const [transactions, setTransactions] = useState(initialTransactions);
+  const { data: fetchedTransactions = [] } = useQuery({
+    queryKey: ["transactions"],
+    queryFn: async () => {
+      const res = await getTransactions({ limit: PAGE_SIZE });
+      return res.transactions;
+    }
+  });
+
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  // Keep internal state in sync with fetched initial data
+  useEffect(() => {
+    if (fetchedTransactions.length > 0 && transactions.length === 0 && !isLoadingMore) {
+      setTransactions(fetchedTransactions);
+    }
+  }, [fetchedTransactions]);
+
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterCategory, setFilterCategory] = useState("");

@@ -1,17 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_CATEGORIES } from "@/lib/constants";
 import { CategoryInput } from "@/validators/category";
-import { getCacheKey, withCache } from "@/lib/cache";
+import { cache } from "react";
 
-export async function getCategoriesForUser(userId: string) {
-  const key = getCacheKey("categories", userId);
-  return withCache(key, () =>
-    prisma.category.findMany({
-      where: { userId },
-      orderBy: { name: "asc" },
-    }),
-  );
-}
+export const getCategoriesForUser = cache(async (userId: string) => {
+  return prisma.category.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+  });
+});
 
 export async function ensureDefaultCategoriesForUser(userId: string) {
   let categories = await getCategoriesForUser(userId);

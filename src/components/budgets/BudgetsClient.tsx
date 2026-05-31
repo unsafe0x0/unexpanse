@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -9,8 +9,9 @@ import { Progress } from "@/components/ui/Progress";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Badge } from "@/components/ui/Badge";
 import { useToast } from "@/components/ui/Toast";
-import { createBudget, updateBudget, deleteBudget } from "@/actions/budgets";
+import { createBudget, updateBudget, deleteBudget, getBudgets, getBudgetSpending } from "@/actions/budgets";
 import { formatCurrency } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import {
   Plus,
@@ -39,25 +40,40 @@ interface Budget {
 }
 
 interface BudgetsClientProps {
-  budgets: Budget[];
   categories: Category[];
-  spending: Record<string, number>;
   currency?: string;
 }
 
 export function BudgetsClient({
-  budgets: initial,
   categories,
-  spending,
   currency = "INR",
 }: BudgetsClientProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const [budgets, setBudgets] = useState(initial);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingAction, setIsLoadingAction] = useState(false);
+
+  const { data: fetchedBudgets = [], isLoading: isLoadingBudgets } = useQuery({
+    queryKey: ["budgets"],
+    queryFn: () => getBudgets(),
+  });
+
+  const { data: spending = {} } = useQuery({
+    queryKey: ["budgetSpending", fetchedBudgets],
+    queryFn: () => getBudgetSpending(fetchedBudgets.map(b => ({ id: b.id, categoryId: b.categoryId || null }))),
+    enabled: fetchedBudgets.length > 0,
+  });
+
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+
+  // Keep internal state in sync with fetched initial data
+  useEffect(() => {
+    if (fetchedBudgets.length > 0 && budgets.length === 0) {
+      setBudgets(fetchedBudgets);
+    }
+  }, [fetchedBudgets]);
   const [form, setForm] = useState({
     name: "",
     amount: "",
@@ -100,7 +116,7 @@ export function BudgetsClient({
     e.preventDefault();
     if (!validate()) return;
 
-    setIsLoading(true);
+    setIsLoadingAction(true);
     try {
       const data = {
         name: form.name.trim(),
@@ -135,13 +151,13 @@ export function BudgetsClient({
     } catch {
       toast.error("Something went wrong");
     } finally {
-      setIsLoading(false);
+      setIsLoadingAction(false);
     }
   };
 
   const handleDelete = async () => {
     if (!deletingId) return;
-    setIsLoading(true);
+    setIsLoadingAction(true);
     try {
       await deleteBudget(deletingId);
       setBudgets((prev) => prev.filter((b) => b.id !== deletingId));
@@ -149,7 +165,7 @@ export function BudgetsClient({
     } catch {
       toast.error("Failed to delete");
     } finally {
-      setIsLoading(false);
+      setIsLoadingAction(false);
       setDeletingId(null);
     }
   };
@@ -185,7 +201,9 @@ export function BudgetsClient({
         </Button>
       </div>
 
-      {budgets.length === 0 ? (
+      {isLoadingBudgets ? (
+        <div className="flex justify-center items-center h-64 text-muted-foreground">Loading budgets...</div>
+      ) : budgets.length === 0 ? (
         <div className="rounded-xl border border-border">
           <EmptyState
             icon={<Target className="h-8 w-8 text-foreground" />}
@@ -354,7 +372,7 @@ export function BudgetsClient({
             >
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" isLoading={isLoading}>
+            <Button type="submit" className="flex-1" isLoading={isLoadingAction}>
               {editingBudget ? "Save" : "Create"}
             </Button>
           </div>
@@ -369,7 +387,7 @@ export function BudgetsClient({
         description="This budget will be permanently deleted."
         confirmLabel="Delete"
         isDestructive
-        isLoading={isLoading}
+        isLoading={isLoadingAction}
       />
     </div>
   );
